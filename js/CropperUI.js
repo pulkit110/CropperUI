@@ -78,6 +78,8 @@ var fluid_1_4 = fluid_1_4 || {};
 	var expectResize = -1; // New, will save the # of the selection handle if the mouse is over one.
 	var mx, my; // mouse coordinates
 	
+	var cropperID;	//ID returned from setInterval
+	
 	// when set to true, the canvas will redraw everything
 	// invalidate() just sets this to false right now
 	// we want to call invalidate() whenever we make a change
@@ -519,7 +521,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 		
 			// make mainDraw() fire every INTERVAL milliseconds
-			var cropperID = setInterval(mainDraw, INTERVAL);
+			cropperID = setInterval(mainDraw, INTERVAL);
 		
 			// set our events. Up and down are for dragging,
 			// double click is for making new boxes
@@ -540,9 +542,6 @@ var fluid_1_4 = fluid_1_4 || {};
 			
 			// add the rectangle for cropping area
 			addRect(a_rectX, a_rectY, a_rectW, a_rectH, 'rgba(2,165,165,0.0)');
-			
-			return cropperID;
-		
 		}
 		
 			
@@ -551,6 +550,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			canvas.onmousedown = null;
 			canvas.onmouseup = null;
 			canvas.onmousemove = null;
+			clearInterval(cropperID);
 		}
         
         return that;
