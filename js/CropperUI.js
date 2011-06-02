@@ -490,7 +490,7 @@ var fluid_1_4 = fluid_1_4 || {};
 
 		// initialize our canvas, add a ghost canvas, set draw loop
 		// then add everything we want to intially exist on the canvas
-		that.init = function(a_canvas, a_resizeFactor, a_image, a_imageX, a_imageY) {
+		that.init = function(a_canvas, a_resizeFactor, a_image, a_imageX, a_imageY, a_rectX, a_rectY, a_rectW, a_rectH) {
 			canvas = a_canvas;
 			HEIGHT = canvas.height;
 			WIDTH = canvas.width;
@@ -533,8 +533,13 @@ var fluid_1_4 = fluid_1_4 || {};
 				selectionHandles.push(rect);
 			}
 		
+			a_rectX = a_rectX ? a_rectX : imageX;
+			a_rectY = a_rectY ? a_rectY : imageY;
+			a_rectW = a_rectW ? a_rectW : image.width/resizeFactor;
+			a_rectH = a_rectH ? a_rectH : image.height/resizeFactor;
+			
 			// add the rectangle for cropping area
-			addRect(240, 120, 40, 40, 'rgba(2,165,165,0.0)');
+			addRect(a_rectX, a_rectY, a_rectW, a_rectH, 'rgba(2,165,165,0.0)');
 			
 			return cropperID;
 		
