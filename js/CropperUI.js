@@ -547,6 +547,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			
 		that.reset = function() {
 			boxes2 = [];
+			canvas.style.cursor='auto';
 			canvas.onmousedown = null;
 			canvas.onmouseup = null;
 			canvas.onmousemove = null;
