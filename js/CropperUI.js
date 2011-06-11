@@ -546,12 +546,36 @@ var fluid_1_4 = fluid_1_4 || {};
 		
 			
 		that.reset = function() {
+			var croppedImageDataURL = cropImage(image, boxes2[0].x-imageX, boxes2[0].y-imageY, boxes2[0].w, boxes2[0].h);
+			
 			boxes2 = [];
 			canvas.style.cursor='auto';
 			canvas.onmousedown = null;
 			canvas.onmouseup = null;
 			canvas.onmousemove = null;
 			clearInterval(cropperID);
+			//document.removeChild (ghostcanvas);
+			
+			return croppedImageDataURL;
+		}
+		
+		var cropImage = function (image, x, y, w, h) {
+			
+			//Map x, y, w, h to account for resizeRatio
+			x *= resizeFactor;
+			y *= resizeFactor;
+			w *= resizeFactor;
+			h *= resizeFactor;
+			
+			//Create canvas to get cropped image pixels
+			var imageManipulationCanvas = document.createElement('canvas');
+			imageManipulationCanvas.height = h;
+			imageManipulationCanvas.width = w;
+			var imageManipulationCtx = imageManipulationCanvas.getContext('2d');
+			imageManipulationCtx.drawImage(image, x, y, w, h, 0, 0, w, h); // Draw cropped image on temporary canvas
+			var croppedImageDataURL = imageManipulationCanvas.toDataURL();	//get DataURL for cropped image
+			return croppedImageDataURL;
+
 		}
         
         return that;
