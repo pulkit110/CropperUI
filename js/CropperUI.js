@@ -546,7 +546,14 @@ var fluid_1_4 = fluid_1_4 || {};
 		
 			
 		that.reset = function() {
-			var croppedImageDataURL = cropImage(image, boxes2[0].x-imageX, boxes2[0].y-imageY, boxes2[0].w, boxes2[0].h);
+			var croppingDimensions = new Object();
+			
+			croppingDimensions.x = boxes2[0].x - imageX;
+			croppingDimensions.y = boxes2[0].y - imageY;
+			croppingDimensions.w = boxes2[0].w;
+			croppingDimensions.h = boxes2[0].h;
+			
+			var croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
 			
 			boxes2 = [];
 			canvas.style.cursor='auto';
@@ -556,7 +563,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			clearInterval(cropperID);
 			//document.removeChild (ghostcanvas);
 			
-			return croppedImageDataURL;
+			return [croppedImageDataURL, croppingDimensions];
 		}
 		
 		var cropImage = function (image, x, y, w, h) {
