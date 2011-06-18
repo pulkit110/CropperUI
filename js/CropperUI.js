@@ -86,7 +86,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	};
 	
 	// Box object to hold data
-	function Box2() {
+	function Box() {
 		this.x = 0;
 		this.y = 0;
 		this.w = 1; // default width and height?
@@ -95,7 +95,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	}
 	
 	// New methods on the Box class
-	Box2.prototype = {
+	Box.prototype = {
 		// we used to have a solo draw function
 		// each box is responsible for its own drawing
 		// mainDraw() will call this with the normal canvas
@@ -198,7 +198,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	
 	//Initialize a new Box, add it, and invalidate the canvas
 	var addRect = function (x, y, w, h, fill) {
-		var rect = new Box2();
+		var rect = new Box();
 		rect.x = x;
 		rect.y = y;
 		rect.w = w;
@@ -517,7 +517,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		
 			// set up the selection handle boxes
 			for (var i = 0; i < 8; i++) {
-				var rect = new Box2();
+				var rect = new Box();
 				selectionHandles.push(rect);
 			}
 		
