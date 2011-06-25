@@ -195,18 +195,6 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 		} // end draw
 	};
-	
-	//Initialize a new Box, add it, and invalidate the canvas
-	var addRect = function (x, y, w, h, fill) {
-		var rect = new Box();
-		rect.x = x;
-		rect.y = y;
-		rect.w = w;
-		rect.h = h;
-		rect.fill = fill;
-		boxes.push(rect);
-		invalidate();
-	};
     
 	var drawImage = function (imageCanvasContext, image, resizeFactor) {
 		imageCanvasContext.drawImage(image, imageX, imageY, image.width / resizeFactor, image.height / resizeFactor);
@@ -261,132 +249,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		my = e.pageY - offsetY;
 	};
 	
-	// Happens when the mouse is moving inside the canvas
-	var cropperMouseMove = function (e) {
-		if (isDrag) {
-			getMouse(e);
 	
-			mySel.x = mx - offsetx;
-			mySel.y = my - offsety;
-	
-			// something is changing position so we better invalidate the canvas!
-			invalidate();
-		} else if (isResizeDrag) {
-			// time ro resize!
-			var oldx = mySel.x;
-			var oldy = mySel.y;
-	
-			// 0  1  2
-			// 3     4
-			// 5  6  7
-			switch (expectResize) {
-			case 0:
-				mySel.x = mx;
-				mySel.y = my;
-				mySel.w += oldx - mx;
-				mySel.h += oldy - my;
-				break;
-			case 1:
-				mySel.y = my;
-				mySel.h += oldy - my;
-				break;
-			case 2:
-				mySel.y = my;
-				mySel.w = mx - oldx;
-				mySel.h += oldy - my;
-				break;
-			case 3:
-				mySel.x = mx;
-				mySel.w += oldx - mx;
-				break;
-			case 4:
-				mySel.w = mx - oldx;
-				break;
-			case 5:
-				mySel.x = mx;
-				mySel.w += oldx - mx;
-				mySel.h = my - oldy;
-				break;
-			case 6:
-				mySel.h = my - oldy;
-				break;
-			case 7:
-				mySel.w = mx - oldx;
-				mySel.h = my - oldy;
-				break;
-			}
-	
-			invalidate();
-		}
-	
-		getMouse(e);
-		
-		// if the mouse is in box, then change the cursor
-		var l = boxes.length;
-		var i = 0;
-		for (i = 0; i < l; i++) {
-			if (mx >= boxes[i].x && mx <= boxes[i].x + boxes[i].w && my >= boxes[i].y && my <= boxes[i].y + boxes[i].h) {
-				this.style.cursor = 'move';
-				break;
-			}
-		}
-		if (i === l) {
-			this.style.cursor = 'auto';
-		}
-		
-		// if there's a selection see if we grabbed one of the selection handles
-		if (mySel !== null && !isResizeDrag) {
-			for (i = 0; i < 8; i++) {
-				// 0  1  2
-				// 3     4
-				// 5  6  7
-	
-				var cur = selectionHandles[i];
-	
-				// we dont need to use the ghost context because
-				// selection handles will always be rectangles
-				if (mx >= cur.x && mx <= cur.x + selBoxSize &&
-						my >= cur.y && my <= cur.y + selBoxSize) {
-					// we found one!
-					expectResize = i;
-					invalidate();
-	
-					switch (i) {
-					case 0:
-						this.style.cursor = 'nw-resize';
-						break;
-					case 1:
-						this.style.cursor = 'n-resize';
-						break;
-					case 2:
-						this.style.cursor = 'ne-resize';
-						break;
-					case 3:
-						this.style.cursor = 'w-resize';
-						break;
-					case 4:
-						this.style.cursor = 'e-resize';
-						break;
-					case 5:
-						this.style.cursor = 'sw-resize';
-						break;
-					case 6:
-						this.style.cursor = 's-resize';
-						break;
-					case 7:
-						this.style.cursor = 'se-resize';
-						break;
-					}
-					return;
-				}
-	
-			}
-			// not over a selection box, return to normal
-			isResizeDrag = false;
-			expectResize = -1;
-		}
-	
-	};
 	
 	// Happens when the mouse is clicked in the canvas
 	var cropperMouseDown = function (e) {
@@ -428,24 +291,6 @@ var fluid_1_4 = fluid_1_4 || {};
 		clear(gctx);
 		// invalidate because we might need the selection border to disappear
 		invalidate();
-	};
-	
-	var cropperMouseUp = function () {
-		isDrag = false;
-		isResizeDrag = false;
-		expectResize = -1;
-	
-		if (mySel) {
-			if (mySel.h < 0) {
-				mySel.y += mySel.h;
-				mySel.h *= -1;
-			}
-	
-			if (mySel.w < 0) {
-				mySel.x += mySel.w;
-				mySel.w *= -1;
-			}
-		}
 	};
 
 	var cropImage = function (image, x, y, w, h) {
@@ -509,6 +354,161 @@ var fluid_1_4 = fluid_1_4 || {};
 			// make mainDraw() fire every INTERVAL milliseconds
 			cropperID = setInterval(mainDraw, INTERVAL);
 		
+			var cropperMouseUp = function () {
+				isDrag = false;
+				isResizeDrag = false;
+				expectResize = -1;
+			
+				if (mySel) {
+					if (mySel.h < 0) {
+						mySel.y += mySel.h;
+						mySel.h *= -1;
+						that.events.onChangeHeight.fire(mySel.h);
+					}
+			
+					if (mySel.w < 0) {
+						mySel.x += mySel.w;
+						mySel.w *= -1;
+						that.events.onChangeWidth.fire(mySel.w);
+					}
+				}
+			};
+			
+			// Happens when the mouse is moving inside the canvas
+			var cropperMouseMove = function (e) {
+				if (isDrag) {
+					getMouse(e);
+					mySel.x = mx - offsetx;
+					mySel.y = my - offsety;
+
+					// something is changing position so we better invalidate the canvas!
+					invalidate();
+				} else if (isResizeDrag) {
+					// time ro resize!
+					var oldx = mySel.x;
+					var oldy = mySel.y;
+			
+					// 0  1  2
+					// 3     4
+					// 5  6  7
+					switch (expectResize) {
+					case 0:
+						mySel.x = mx;
+						mySel.y = my;
+						mySel.w += oldx - mx;
+						that.events.onChangeWidth.fire(mySel.w);
+						mySel.h += oldy - my;
+						that.events.onChangeHeight.fire(mySel.h);
+						break;
+					case 1:
+						mySel.y = my;
+						mySel.h += oldy - my;
+						that.events.onChangeHeight.fire(mySel.h);
+						break;
+					case 2:
+						mySel.y = my;
+						mySel.w = mx - oldx;
+						that.events.onChangeWidth.fire(mySel.w);
+						mySel.h += oldy - my;
+						that.events.onChangeHeight.fire(mySel.h);
+						break;
+					case 3:
+						mySel.x = mx;
+						mySel.w += oldx - mx;
+						that.events.onChangeWidth.fire(mySel.w);
+						break;
+					case 4:
+						mySel.w = mx - oldx;
+						that.events.onChangeWidth.fire(mySel.w);
+						break;
+					case 5:
+						mySel.x = mx;
+						mySel.w += oldx - mx;
+						that.events.onChangeWidth.fire(mySel.w);
+						mySel.h = my - oldy;
+						that.events.onChangeHeight.fire(mySel.h);
+						break;
+					case 6:
+						mySel.h = my - oldy;
+						that.events.onChangeHeight.fire(mySel.h);
+						break;
+					case 7:
+						mySel.w = mx - oldx;
+						that.events.onChangeWidth.fire(mySel.w);
+						mySel.h = my - oldy;
+						that.events.onChangeHeight.fire(mySel.h);
+						break;
+					}
+			
+					invalidate();
+				}
+			
+				getMouse(e);
+				
+				// if the mouse is in box, then change the cursor
+				var l = boxes.length;
+				var i = 0;
+				for (i = 0; i < l; i++) {
+					if (mx >= boxes[i].x && mx <= boxes[i].x + boxes[i].w && my >= boxes[i].y && my <= boxes[i].y + boxes[i].h) {
+						this.style.cursor = 'move';
+						break;
+					}
+				}
+				if (i === l) {
+					this.style.cursor = 'auto';
+				}
+				
+				// if there's a selection see if we grabbed one of the selection handles
+				if (mySel !== null && !isResizeDrag) {
+					for (i = 0; i < 8; i++) {
+						// 0  1  2
+						// 3     4
+						// 5  6  7
+						var cur = selectionHandles[i];
+						// we dont need to use the ghost context because
+						// selection handles will always be rectangles
+						if (mx >= cur.x && mx <= cur.x + selBoxSize &&
+								my >= cur.y && my <= cur.y + selBoxSize) {
+							// we found one!
+							expectResize = i;
+							invalidate();
+			
+							switch (i) {
+							case 0:
+								this.style.cursor = 'nw-resize';
+								break;
+							case 1:
+								this.style.cursor = 'n-resize';
+								break;
+							case 2:
+								this.style.cursor = 'ne-resize';
+								break;
+							case 3:
+								this.style.cursor = 'w-resize';
+								break;
+							case 4:
+								this.style.cursor = 'e-resize';
+								break;
+							case 5:
+								this.style.cursor = 'sw-resize';
+								break;
+							case 6:
+								this.style.cursor = 's-resize';
+								break;
+							case 7:
+								this.style.cursor = 'se-resize';
+								break;
+							}
+							return;
+						}
+			
+					}
+					// not over a selection box, return to normal
+					isResizeDrag = false;
+					expectResize = -1;
+				}
+			};
+			
 			// set our events. Up and down are for dragging,
 			// double click is for making new boxes
 			canvas.onmousedown = cropperMouseDown;
@@ -526,6 +526,20 @@ var fluid_1_4 = fluid_1_4 || {};
 			a_rectW = a_rectW ? a_rectW : image.width / resizeFactor;
 			a_rectH = a_rectH ? a_rectH : image.height / resizeFactor;
 			
+			//Initialize a new Box, add it, and invalidate the canvas
+			var addRect = function (x, y, w, h, fill) {
+				var rect = new Box();
+				rect.x = x;
+				rect.y = y;
+				rect.w = w;
+				that.events.onChangeWidth.fire(rect.w);
+				rect.h = h;
+				that.events.onChangeHeight.fire(rect.h);
+				rect.fill = fill;
+				boxes.push(rect);
+				invalidate();
+			};
+	
 			// add the rectangle for cropping area
 			addRect(a_rectX, a_rectY, a_rectW, a_rectH, 'rgba(2,165,165,0.0)');
 		};
@@ -552,11 +566,42 @@ var fluid_1_4 = fluid_1_4 || {};
 			return [croppedImageDataURL, croppingDimensions];
 		};
         
+        that.setLocation = function (newLocation) {
+        	
+        };
+        
+        that.setWidth = function (newWidth) {
+        	if (boxes.length > 0) {
+        		boxes[0].w = newWidth;
+        		that.events.onChangeWidth.fire(boxes[0].w);
+        		invalidate();
+        	} else {
+        		return false;
+        	}
+        	return true;
+        };
+        
+        that.setHeight = function (newHeight) {
+        	if (boxes.length > 0) {
+        		boxes[0].h = newHeight;
+        		that.events.onChangeHeight.fire(boxes[0].h);
+        		invalidate();
+        	} else {
+        		return false;
+        	}
+        	return true;
+        };
+        
         return that;
     };
 
     fluid.defaults("fluid.cropperUI", {
-        gradeNames: "fluid.viewComponent"
+        gradeNames: "fluid.viewComponent",
+        events: {
+        	onChangeHeight: null,
+        	onChangeWidth: null,
+        	onChangeLocation: null
+        }
     });
     //we'll put our default options here
 
