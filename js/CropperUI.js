@@ -209,7 +209,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	// While draw is called as often as the INTERVAL variable demands,
 	// It only ever does something if the canvas gets invalidated by our code
 	var mainDraw = function () {
-		if (canvasValid === false) {
+		if (canvas && canvasValid === false) {
 			clear(ctx);
 	
 			// Add stuff you want drawn in the background all the time here
@@ -558,6 +558,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		
 			
 		that.reset = function (isNotForCrop) {
+			
 			var croppingDimensions = {};
 			var croppedImageDataURL;
 			
@@ -568,13 +569,16 @@ var fluid_1_4 = fluid_1_4 || {};
 				croppingDimensions.h = boxes[0].h;
 				croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
 			} 
-			
 			boxes = [];
 			if (canvas) {
 				canvas.style.cursor = 'auto';
 				canvas.onmousedown = null;
 				canvas.onmouseup = null;
 				canvas.onmousemove = null;
+			}
+			if (isNotForCrop) {
+				invalidate();
+				mainDraw();
 			}
 			if (cropperID) {
 				clearInterval(cropperID);
