@@ -362,12 +362,14 @@ var fluid_1_4 = fluid_1_4 || {};
 				if (mySel) {
 					if (mySel.h < 0) {
 						mySel.y += mySel.h;
+						that.events.onChangeLocationY.fire(mySel.y);
 						mySel.h *= -1;
 						that.events.onChangeHeight.fire(mySel.h);
 					}
 			
 					if (mySel.w < 0) {
 						mySel.x += mySel.w;
+						that.events.onChangeLocationX.fire(mySel.x);
 						mySel.w *= -1;
 						that.events.onChangeWidth.fire(mySel.w);
 					}
@@ -379,7 +381,9 @@ var fluid_1_4 = fluid_1_4 || {};
 				if (isDrag) {
 					getMouse(e);
 					mySel.x = mx - offsetx;
+					that.events.onChangeLocationX.fire(mySel.x);
 					mySel.y = my - offsety;
+					that.events.onChangeLocationY.fire(mySel.y);
 
 					// something is changing position so we better invalidate the canvas!
 					invalidate();
@@ -394,7 +398,9 @@ var fluid_1_4 = fluid_1_4 || {};
 					switch (expectResize) {
 					case 0:
 						mySel.x = mx;
+						that.events.onChangeLocationX.fire(mySel.x);
 						mySel.y = my;
+						that.events.onChangeLocationY.fire(mySel.y);
 						mySel.w += oldx - mx;
 						that.events.onChangeWidth.fire(mySel.w);
 						mySel.h += oldy - my;
@@ -402,11 +408,13 @@ var fluid_1_4 = fluid_1_4 || {};
 						break;
 					case 1:
 						mySel.y = my;
+						that.events.onChangeLocationY.fire(mySel.y);
 						mySel.h += oldy - my;
 						that.events.onChangeHeight.fire(mySel.h);
 						break;
 					case 2:
 						mySel.y = my;
+						that.events.onChangeLocationY.fire(mySel.y);
 						mySel.w = mx - oldx;
 						that.events.onChangeWidth.fire(mySel.w);
 						mySel.h += oldy - my;
@@ -414,6 +422,7 @@ var fluid_1_4 = fluid_1_4 || {};
 						break;
 					case 3:
 						mySel.x = mx;
+						that.events.onChangeLocationX.fire(mySel.x);
 						mySel.w += oldx - mx;
 						that.events.onChangeWidth.fire(mySel.w);
 						break;
@@ -423,6 +432,7 @@ var fluid_1_4 = fluid_1_4 || {};
 						break;
 					case 5:
 						mySel.x = mx;
+						that.events.onChangeLocationX.fire(mySel.x);
 						mySel.w += oldx - mx;
 						that.events.onChangeWidth.fire(mySel.w);
 						mySel.h = my - oldy;
@@ -530,7 +540,9 @@ var fluid_1_4 = fluid_1_4 || {};
 			var addRect = function (x, y, w, h, fill) {
 				var rect = new Box();
 				rect.x = x;
+				that.events.onChangeLocationX.fire(rect.x);
 				rect.y = y;
+				that.events.onChangeLocationY.fire(rect.y);
 				rect.w = w;
 				that.events.onChangeWidth.fire(rect.w);
 				rect.h = h;
@@ -566,43 +578,60 @@ var fluid_1_4 = fluid_1_4 || {};
 			return [croppedImageDataURL, croppingDimensions];
 		};
         
-        that.setLocation = function (newLocation) {
-        	
-        };
+        that.setLocationX = function (newLocationX) {
+			if (boxes.length > 0) {
+				boxes[0].x = newLocationX;
+				that.events.onChangeLocationX.fire(boxes[0].x);
+				invalidate();
+			} else {
+				return false;
+			}
+			return true;
+		};
         
-        that.setWidth = function (newWidth) {
-        	if (boxes.length > 0) {
-        		boxes[0].w = newWidth;
-        		that.events.onChangeWidth.fire(boxes[0].w);
-        		invalidate();
-        	} else {
-        		return false;
-        	}
-        	return true;
-        };
-        
-        that.setHeight = function (newHeight) {
-        	if (boxes.length > 0) {
-        		boxes[0].h = newHeight;
-        		that.events.onChangeHeight.fire(boxes[0].h);
-        		invalidate();
-        	} else {
-        		return false;
-        	}
-        	return true;
-        };
-        
+        that.setLocationY = function (newLocationY) {
+			if (boxes.length > 0) {
+				boxes[0].y = newLocationY;
+				that.events.onChangeLocationY.fire(boxes[0].y);
+				invalidate();
+			} else {
+				return false;
+			}
+			return true;
+		};
+		that.setWidth = function (newWidth) {
+			if (boxes.length > 0) {
+				boxes[0].w = newWidth;
+				that.events.onChangeWidth.fire(boxes[0].w);
+				invalidate();
+			} else {
+				return false;
+			}
+			return true;
+		};
+		that.setHeight = function (newHeight) {
+			if (boxes.length > 0) {
+				boxes[0].h = newHeight;
+				that.events.onChangeHeight.fire(boxes[0].h);
+				invalidate();
+			} else {
+				return false;
+			}
+			return true;
+		};
+		
         return that;
     };
 
-    fluid.defaults("fluid.cropperUI", {
-        gradeNames: "fluid.viewComponent",
-        events: {
-        	onChangeHeight: null,
-        	onChangeWidth: null,
-        	onChangeLocation: null
-        }
-    });
+	fluid.defaults("fluid.cropperUI", {
+		gradeNames: "fluid.viewComponent",
+		events: {
+			onChangeHeight: null,
+			onChangeWidth: null,
+			onChangeLocationX: null,
+			onChangeLocationY: null
+		}
+	});
     //we'll put our default options here
 
 })(jQuery, fluid_1_4);
