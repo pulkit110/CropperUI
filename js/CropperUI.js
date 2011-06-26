@@ -557,25 +557,30 @@ var fluid_1_4 = fluid_1_4 || {};
 		};
 		
 			
-		that.reset = function () {
+		that.reset = function (isNotForCrop) {
 			var croppingDimensions = {};
+			var croppedImageDataURL;
 			
-			croppingDimensions.x = boxes[0].x - imageX;
-			croppingDimensions.y = boxes[0].y - imageY;
-			croppingDimensions.w = boxes[0].w;
-			croppingDimensions.h = boxes[0].h;
-			
-			var croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
+			if (boxes.length > 0 && !isNotForCrop) {
+				croppingDimensions.x = boxes[0].x - imageX;
+				croppingDimensions.y = boxes[0].y - imageY;
+				croppingDimensions.w = boxes[0].w;
+				croppingDimensions.h = boxes[0].h;
+				croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
+			} 
 			
 			boxes = [];
-			canvas.style.cursor = 'auto';
-			canvas.onmousedown = null;
-			canvas.onmouseup = null;
-			canvas.onmousemove = null;
-			clearInterval(cropperID);
-			//document.removeChild (ghostcanvas);
-			
+			if (canvas) {
+				canvas.style.cursor = 'auto';
+				canvas.onmousedown = null;
+				canvas.onmouseup = null;
+				canvas.onmousemove = null;
+			}
+			if (cropperID) {
+				clearInterval(cropperID);
+			}
 			return [croppedImageDataURL, croppingDimensions];
+			
 		};
         
         that.setLocationX = function (newLocationX) {
