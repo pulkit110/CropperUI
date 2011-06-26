@@ -599,8 +599,12 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 			return true;
 		};
-		that.setWidth = function (newWidth) {
+		that.setWidth = function (newWidth, isFixedRatioOn) {
 			if (boxes.length > 0) {
+				if (isFixedRatioOn) {
+					boxes[0].h = newWidth / boxes[0].w * boxes[0].h;
+					that.events.onChangeHeight.fire(boxes[0].h);
+				}
 				boxes[0].w = newWidth;
 				that.events.onChangeWidth.fire(boxes[0].w);
 				invalidate();
@@ -609,8 +613,12 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 			return true;
 		};
-		that.setHeight = function (newHeight) {
+		that.setHeight = function (newHeight, isFixedRatioOn) {
 			if (boxes.length > 0) {
+				if (isFixedRatioOn) {
+					boxes[0].w = newHeight / boxes[0].h * boxes[0].w;
+					that.events.onChangeWidth.fire(boxes[0].w);
+				}
 				boxes[0].h = newHeight;
 				that.events.onChangeHeight.fire(boxes[0].h);
 				invalidate();
