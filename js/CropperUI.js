@@ -1,7 +1,5 @@
 /*
-Copyright 2008-2009 University of Toronto
-Copyright 2008-2009 University of California, Berkeley
-Copyright 2010-2011 OCAD University
+Copyright 2011 OCAD University
 
 Licensed under the Educational Community License (ECL), Version 2.0 or the New
 BSD license. You may not use this file except in compliance with one these
@@ -315,7 +313,7 @@ var fluid_1_4 = fluid_1_4 || {};
     /**
      * Instantiates a new CropperUI component.
      * 
-     * @param {Object} container the DOM element in which the Image Editor lives
+     * @param {Object} container the DOM element in which the TaggerUI lives
      * @param {Object} options configuration options for the component.
      */
     fluid.cropperUI = function (container, options) {
