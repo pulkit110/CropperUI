@@ -560,13 +560,16 @@ var fluid_1_4 = fluid_1_4 || {};
 			var croppingDimensions = {};
 			var croppedImageDataURL;
 			
-			if (boxes.length > 0 && !isNotForCrop) {
+			if (boxes.length > 0) {
 				croppingDimensions.x = boxes[0].x - imageX;
 				croppingDimensions.y = boxes[0].y - imageY;
 				croppingDimensions.w = boxes[0].w;
 				croppingDimensions.h = boxes[0].h;
-				croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
-			} 
+				if (!isNotForCrop) {
+					croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
+				} 
+			}
+			
 			boxes = [];
 			if (canvas) {
 				canvas.style.cursor = 'auto';
