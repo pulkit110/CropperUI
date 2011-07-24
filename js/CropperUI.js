@@ -23,9 +23,6 @@ var fluid_1_4 = fluid_1_4 || {};
 
 (function ($, fluid) {
 
-	// holds all our boxes
-	var boxes = [];
-
 	// Holds the 8 tiny boxes that will be our selection handles
 	// the selection handles will be in this order:
 	// 0  1  2
@@ -137,7 +134,6 @@ var fluid_1_4 = fluid_1_4 || {};
 
 	// New methods on the Box class
 	Box.prototype = {
-		// we used to have a solo draw function
 		// each box is responsible for its own drawing
 		// mainDraw() will call this with the normal canvas
 		// cropperMouseDown will call this with the ghost canvas with 'black'
@@ -192,7 +188,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				context.lineWidth = selWidth;
 				context.strokeRect(this.x, this.y, this.w, this.h);
 
-				// draw the boxes
+				// draw the selection handles
 				setupSelectionHandles(this);
 				drawSelectionHandles(selBoxColor, context);
 				
@@ -207,25 +203,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	var clear = function (c) {
 		c.clearRect(0, 0, WIDTH, HEIGHT);
 	};
-	// Main draw loop.
-	// While draw is called as often as the INTERVAL variable demands,
-	// It only ever does something if the canvas gets invalidated by our code
-	var mainDraw = function () {
-		if (canvas && canvasValid === false) {
-			clear(ctx);
-
-			// Add stuff you want drawn in the background all the time here
-			drawImage(ctx, image, resizeFactor, imageX, imageY);
-
-			// draw all boxes
-			var l = boxes.length;
-			for (var i = 0; i < l; i++) {
-				boxes[i].draw(ctx); // we used to call drawshape, but now each box draws itself
-			}
-
-			canvasValid = true;
-		}
-	};
+	
 	// Sets mx,my to the mouse position relative to the canvas
 	// unfortunately this can be tricky, we have to worry about padding and borders
 	var getMouse = function (e) {
@@ -249,47 +227,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		mx = e.pageX - offsetX;
 		my = e.pageY - offsetY;
 	};
-	// Happens when the mouse is clicked in the canvas
-	var cropperMouseDown = function (e) {
-		getMouse(e);
-
-		//we are over a selection box
-		if (expectResize !== -1) {
-			isResizeDrag = true;
-			return;
-		}
-
-		clear(gctx);
-		var l = boxes.length;
-		for (var i = l - 1; i >= 0; i--) {
-			// draw shape onto ghost context
-			boxes[i].draw(gctx, 'black');
-
-			// get image data at the mouse x,y pixel
-			var imageData = gctx.getImageData(mx, my, 1, 1);
-
-			// if the mouse pixel exists, select and break
-			if (imageData.data[3] > 0) {
-				mySel = boxes[i];
-				offsetx = mx - mySel.x;
-				offsety = my - mySel.y;
-				mySel.x = mx - offsetx;
-				mySel.y = my - offsety;
-				isDrag = true;
-
-				invalidate();
-				clear(gctx);
-				return;
-			}
-
-		}
-		// havent returned means we have selected nothing
-		mySel = null;
-		// clear the ghost canvas for next time
-		clear(gctx);
-		// invalidate because we might need the selection border to disappear
-		invalidate();
-	};
+	
 	var cropImage = function (image, x, y, w, h) {
 
 		//Map x, y, w, h to account for resizeRatio
@@ -407,6 +345,20 @@ var fluid_1_4 = fluid_1_4 || {};
 	fluid.cropperUI = function (container, options) {
 		var that = fluid.initView("fluid.cropperUI", container, options);
 
+		// Main draw loop.
+		// While draw is called as often as the INTERVAL variable demands,
+		// It only ever does something if the canvas gets invalidated by our code
+		var mainDraw = function () {
+			if (canvas && canvasValid === false) {
+				clear(ctx);
+				drawImage(ctx, image, resizeFactor, imageX, imageY);
+				if (that.box != null) {
+					that.box.draw(ctx);
+				}
+				canvasValid = true;
+			}
+		};
+		
 		// initialize our canvas, add a ghost canvas, set draw loop
 		// then add everything we want to intially exist on the canvas
 		that.init = function (a_canvas, a_resizeFactor, a_image, a_imageX, a_imageY, a_rectX, a_rectY, a_rectW, a_rectH) {
@@ -423,6 +375,8 @@ var fluid_1_4 = fluid_1_4 || {};
 			ghostcanvas.height = HEIGHT;
 			ghostcanvas.width = WIDTH;
 			gctx = ghostcanvas.getContext('2d');
+			
+			that.highlightedSelectionHandleIndex = 0;
 
 			//fixes a problem where double clicking causes text to get selected on the canvas
 			canvas.onselectstart = function () {
@@ -440,6 +394,38 @@ var fluid_1_4 = fluid_1_4 || {};
 			// make mainDraw() fire every INTERVAL milliseconds
 			cropperID = setInterval(mainDraw, INTERVAL);
 
+			// Happens when the mouse is clicked in the canvas
+			var cropperMouseDown = function (e) {
+				getMouse(e);
+		
+				clear(gctx);
+				that.box.draw(gctx, 'black');
+				
+				var mouseInBox = false;
+				if (that.box != null) {
+					if (mx >= that.box.x && mx <= that.box.x + that.box.w && my >= that.box.y && my <= that.box.y + that.box.h) {
+						mySel = that.box;
+						offsetx = mx - mySel.x;
+						offsety = my - mySel.y;
+						mySel.x = mx - offsetx;
+						mySel.y = my - offsety;
+						isDrag = true;
+						mouseInBox = true;
+						invalidate();
+						clear(gctx);
+					}
+				}
+				if (!mouseInBox) {
+					isDrag = false;
+				}
+				
+				//we are over a selection box
+				if (expectResize !== -1) {
+					isResizeDrag = true;
+					return;
+				}
+			};
+			
 			var cropperMouseUp = function () {
 				isDrag = false;
 				isResizeDrag = false;
@@ -480,16 +466,14 @@ var fluid_1_4 = fluid_1_4 || {};
 
 				getMouse(e);
 
-				// if the mouse is in box, then change the cursor
-				var l = boxes.length;
-				var i = 0;
-				for (i = 0; i < l; i++) {
-					if (mx >= boxes[i].x && mx <= boxes[i].x + boxes[i].w && my >= boxes[i].y && my <= boxes[i].y + boxes[i].h) {
+				var mouseInBox = false;
+				if (that.box != null) {
+					if (mx >= that.box.x && mx <= that.box.x + that.box.w && my >= that.box.y && my <= that.box.y + that.box.h) {
 						this.style.cursor = 'move';
-						break;
+						mouseInBox = true;
 					}
 				}
-				if (i === l) {
+				if (!mouseInBox) {
 					this.style.cursor = 'auto';
 				}
 
@@ -518,8 +502,15 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 			};
 			
+			var CropperKeyPress = function (evt) {
+				if (evt.which === 9) {
+					evt.preventDefault();
+					that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 8;
+					invalidate();
+				}
+			};
+			
 			// set our events. Up and down are for dragging,
-			// double click is for making new boxes
 			canvas.onmousedown = cropperMouseDown;
 			canvas.onmouseup = cropperMouseUp;
 			canvas.onmousemove = cropperMouseMove;
@@ -547,28 +538,33 @@ var fluid_1_4 = fluid_1_4 || {};
 				rect.h = h;
 				that.events.onChangeHeight.fire(rect.h);
 				rect.fill = fill;
-				boxes.push(rect);
+				that.box = rect;
 				invalidate();
 			};
 			// add the rectangle for cropping area
 			addRect(a_rectX, a_rectY, a_rectW, a_rectH, 'rgba(2,165,165,0.0)');
 		};
+		
 		that.reset = function (isNotForCrop) {
 
 			var croppingDimensions = {};
 			var croppedImageDataURL;
 
-			if (boxes.length > 0) {
-				croppingDimensions.x = boxes[0].x - imageX;
-				croppingDimensions.y = boxes[0].y - imageY;
-				croppingDimensions.w = boxes[0].w;
-				croppingDimensions.h = boxes[0].h;
+			if (that.box != null) {
+				croppingDimensions.x = that.box.x - imageX;
+				croppingDimensions.y = that.box.y - imageY;
+				croppingDimensions.w = that.box.w;
+				croppingDimensions.h = that.box.h;
 				if (!isNotForCrop) {
 					croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
 				}
 			}
 
-			boxes = [];
+			if (cropperID) {
+				clearInterval(cropperID);
+			}
+			
+			that.box = null;
 			if (canvas) {
 				canvas.style.cursor = 'auto';
 				canvas.onmousedown = null;
@@ -579,16 +575,14 @@ var fluid_1_4 = fluid_1_4 || {};
 				invalidate();
 				mainDraw();
 			}
-			if (cropperID) {
-				clearInterval(cropperID);
-			}
+			
 			return [croppedImageDataURL, croppingDimensions];
 
 		};
 		that.setLocationX = function (newLocationX) {
-			if (boxes.length > 0) {
-				boxes[0].x = newLocationX;
-				that.events.onChangeLocationX.fire(boxes[0].x);
+			if (that.box != null) {
+				that.box.x = newLocationX;
+				that.events.onChangeLocationX.fire(that.box.x);
 				invalidate();
 			} else {
 				return false;
@@ -596,9 +590,9 @@ var fluid_1_4 = fluid_1_4 || {};
 			return true;
 		};
 		that.setLocationY = function (newLocationY) {
-			if (boxes.length > 0) {
-				boxes[0].y = newLocationY;
-				that.events.onChangeLocationY.fire(boxes[0].y);
+			if (that.box != null) {
+				that.box.y = newLocationY;
+				that.events.onChangeLocationY.fire(that.box.y);
 				invalidate();
 			} else {
 				return false;
@@ -606,13 +600,13 @@ var fluid_1_4 = fluid_1_4 || {};
 			return true;
 		};
 		that.setWidth = function (newWidth, isFixedRatioOn) {
-			if (boxes.length > 0) {
+			if (that.box != null) {
 				if (isFixedRatioOn) {
-					boxes[0].h = newWidth / boxes[0].w * boxes[0].h;
-					that.events.onChangeHeight.fire(boxes[0].h);
+					that.box.h = newWidth / that.box.w * that.box.h;
+					that.events.onChangeHeight.fire(that.box.h);
 				}
-				boxes[0].w = newWidth;
-				that.events.onChangeWidth.fire(boxes[0].w);
+				that.box.w = newWidth;
+				that.events.onChangeWidth.fire(that.box.w);
 				invalidate();
 			} else {
 				return false;
@@ -620,13 +614,13 @@ var fluid_1_4 = fluid_1_4 || {};
 			return true;
 		};
 		that.setHeight = function (newHeight, isFixedRatioOn) {
-			if (boxes.length > 0) {
+			if (that.box != null) {
 				if (isFixedRatioOn) {
-					boxes[0].w = newHeight / boxes[0].h * boxes[0].w;
-					that.events.onChangeWidth.fire(boxes[0].w);
+					that.box.w = newHeight / that.box.h * that.box.w;
+					that.events.onChangeWidth.fire(that.box.w);
 				}
-				boxes[0].h = newHeight;
-				that.events.onChangeHeight.fire(boxes[0].h);
+				that.box.h = newHeight;
+				that.events.onChangeHeight.fire(that.box.h);
 				invalidate();
 			} else {
 				return false;
