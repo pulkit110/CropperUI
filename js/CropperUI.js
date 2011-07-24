@@ -61,6 +61,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	var selWidth = 0;
 	var selBoxColor = 'darkred'; // Selection boxes
 	var selBoxSize = 6;
+	var highlightColor = 'yellow';
 
 	var blurStyle = 'rgba(255,255,255,0.4)';
 
@@ -113,6 +114,11 @@ var fluid_1_4 = fluid_1_4 || {};
 
 		selectionHandles[7].x = box.x + box.w - half;
 		selectionHandles[7].y = box.y + box.h - half;
+		
+		for (var i = 0; i < 8; ++i) {
+			selectionHandles[i].h = selBoxSize;
+			selectionHandles[i].w = selBoxSize;
+		}
 	};
 	
 	var drawSelectionHandles = function (color, context) {
@@ -134,6 +140,12 @@ var fluid_1_4 = fluid_1_4 || {};
 
 	// New methods on the Box class
 	Box.prototype = {
+		highlight: function (context) {
+			context.strokeStyle = highlightColor;
+			context.lineWidth = selWidth;
+			context.strokeRect(this.x, this.y, this.w, this.h);
+		},
+		
 		// each box is responsible for its own drawing
 		// mainDraw() will call this with the normal canvas
 		// cropperMouseDown will call this with the ghost canvas with 'black'
@@ -307,6 +319,84 @@ var fluid_1_4 = fluid_1_4 || {};
 		}
 	};
 	
+	var handleResizeByKeyboard = function (that) {
+		// 0  1  2
+		// 3     4
+		// 5  6  7
+		if (that.keyboardLeftDown) {
+			if (that.highlightedSelectionHandleIndex == 8) {
+				that.box.x--;
+				that.events.onChangeLocationX.fire(that.box.x);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 3 || that.highlightedSelectionHandleIndex == 5) {
+				that.box.x--;
+				that.events.onChangeLocationX.fire(that.box.x);
+				that.box.w++;
+				that.events.onChangeWidth.fire(that.box.w);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
+				that.box.w--;
+				that.events.onChangeWidth.fire(that.box.w);
+				invalidate();
+			}
+		}
+		
+		if (that.keyboardUpDown) {
+			if (that.highlightedSelectionHandleIndex == 8) {
+				that.box.y--;
+				that.events.onChangeLocationY.fire(that.box.y);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 1 || that.highlightedSelectionHandleIndex == 2) {
+				that.box.y--;
+				that.events.onChangeLocationY.fire(that.box.y);
+				that.box.h++;
+				that.events.onChangeHeight.fire(that.box.h);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
+				that.box.h--;
+				that.events.onChangeHeight.fire(that.box.h);
+				invalidate();
+			}
+		}
+		
+		if (that.keyboardRightDown) {
+			if (that.highlightedSelectionHandleIndex == 8) {
+				that.box.x++;
+				that.events.onChangeLocationX.fire(that.box.x);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 3 || that.highlightedSelectionHandleIndex == 5) {
+				that.box.x++;
+				that.events.onChangeLocationX.fire(that.box.x);
+				that.box.w--;
+				that.events.onChangeWidth.fire(that.box.w);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
+				that.box.w++;
+				that.events.onChangeWidth.fire(that.box.w);
+				invalidate();
+			}
+		}
+		
+		if (that.keyboardDownDown) {
+			if (that.highlightedSelectionHandleIndex == 8) {
+				that.box.y++;
+				that.events.onChangeLocationY.fire(that.box.y);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 1 || that.highlightedSelectionHandleIndex == 2) {
+				that.box.y++;
+				that.events.onChangeLocationY.fire(that.box.y);
+				that.box.h--;
+				that.events.onChangeHeight.fire(that.box.h);
+				invalidate();
+			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
+				that.box.h++;
+				that.events.onChangeHeight.fire(that.box.h);
+				invalidate();
+			}
+		}
+		
+	};
+	
 	var setCursorForHandles = function (style, i) {
 		switch (i) {
 			case 0:
@@ -357,6 +447,13 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 				canvasValid = true;
 			}
+			if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex != 8) {
+				selectionHandles[that.highlightedSelectionHandleIndex].highlight(ctx);
+			} else if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex == 8) {
+				if (that.box != null) {
+					that.box.highlight(ctx);
+				}
+			}
 		};
 		
 		// initialize our canvas, add a ghost canvas, set draw loop
@@ -377,6 +474,10 @@ var fluid_1_4 = fluid_1_4 || {};
 			gctx = ghostcanvas.getContext('2d');
 			
 			that.highlightedSelectionHandleIndex = 0;
+			that.keyboardLeftDown = false;
+			that.keyboardUpDown = false;
+			that.keyboardRightDown = false;
+			that.keyboardDownDown = false;
 
 			//fixes a problem where double clicking causes text to get selected on the canvas
 			canvas.onselectstart = function () {
@@ -502,11 +603,55 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 			};
 			
-			var CropperKeyPress = function (evt) {
-				if (evt.which === 9) {
-					evt.preventDefault();
-					that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 8;
-					invalidate();
+			var cropperKeyDown = function (evt) {
+				switch (evt.which) {
+					case 9:
+						// TAB Key
+						evt.preventDefault();
+						that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
+						invalidate();
+						break;
+					case 37:
+						// Left Arrow
+						that.keyboardLeftDown = true;
+						handleResizeByKeyboard(that);
+						break;
+					case 38:
+						// Up Arrow
+						that.keyboardUpDown = true;
+						handleResizeByKeyboard(that);
+						break;
+					case 39:
+						// Right Arrow
+						that.keyboardRightDown = true;
+						handleResizeByKeyboard(that);
+						break;
+					case 40:
+						// Down Arrow
+						that.keyboardDownDown = true;
+						handleResizeByKeyboard(that);
+						break;
+				}
+			};
+			
+			var cropperKeyUp = function (evt) {
+				switch (evt.which) {
+					case 37:
+						// Left Arrow
+						that.keyboardLeftDown = false;
+						break;
+					case 38:
+						// Up Arrow
+						that.keyboardUpDown = false;
+						break;
+					case 39:
+						// Right Arrow
+						that.keyboardRightDown = false;
+						break;
+					case 40:
+						// Down Arrow
+						that.keyboardDownDown = false;
+						break;
 				}
 			};
 			
@@ -514,6 +659,9 @@ var fluid_1_4 = fluid_1_4 || {};
 			canvas.onmousedown = cropperMouseDown;
 			canvas.onmouseup = cropperMouseUp;
 			canvas.onmousemove = cropperMouseMove;
+			
+			$(document).keydown(cropperKeyDown);
+			$(document).keyup(cropperKeyUp);
 
 			// set up the selection handle boxes
 			for (var i = 0; i < 8; i++) {
@@ -539,6 +687,8 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeHeight.fire(rect.h);
 				rect.fill = fill;
 				that.box = rect;
+				
+				mySel = that.box;
 				invalidate();
 			};
 			// add the rectangle for cropping area
@@ -570,6 +720,8 @@ var fluid_1_4 = fluid_1_4 || {};
 				canvas.onmousedown = null;
 				canvas.onmouseup = null;
 				canvas.onmousemove = null;
+				$(document).unbind('keydown');
+				$(document).unbind('keyup');
 			}
 			if (isNotForCrop) {
 				invalidate();
