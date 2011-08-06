@@ -136,16 +136,14 @@ var fluid_1_4 = fluid_1_4 || {};
 		this.fill = '#444444';
 	}
 
-	// New methods on the Box class
 	Box.prototype = {
 		highlight: function (context) {
 			context.strokeStyle = highlightColor;
 			context.lineWidth = selWidth;
 			context.strokeRect(this.x, this.y, this.w, this.h);
 		},
-		// each box is responsible for its own drawing
+		
 		// mainDraw() will call this with the normal canvas
-		// cropperMouseDown will call this with the ghost canvas with 'black'
 		draw: function (context, optionalColor) {
 			if (context === gctx) {
 				context.fillStyle = 'black'; // always want black for the ghost canvas
@@ -545,6 +543,12 @@ var fluid_1_4 = fluid_1_4 || {};
 				clear(gctx);
 				that.box.draw(gctx, 'black');
 
+				//we are over a selection box
+				if (expectResize !== -1) {
+					isResizeDrag = true;
+					return;
+				}
+				
 				var mouseInBox = false;
 				if (that.box != null) {
 					if (mx >= that.box.x && mx <= that.box.x + that.box.w && my >= that.box.y && my <= that.box.y + that.box.h) {
@@ -563,11 +567,7 @@ var fluid_1_4 = fluid_1_4 || {};
 					isDrag = false;
 				}
 
-				//we are over a selection box
-				if (expectResize !== -1) {
-					isResizeDrag = true;
-					return;
-				}
+				
 			};
 			var cropperMouseUp = function () {
 				isDrag = false;
