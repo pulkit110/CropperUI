@@ -265,12 +265,14 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeWidth.fire(mySel.w);
 				mySel.h += oldy - my;
 				that.events.onChangeHeight.fire(mySel.h);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 			case 1:
 				mySel.y = my;
 				that.events.onChangeLocationY.fire(mySel.y);
 				mySel.h += oldy - my;
 				that.events.onChangeHeight.fire(mySel.h);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 			case 2:
 				mySel.y = my;
@@ -279,16 +281,19 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeWidth.fire(mySel.w);
 				mySel.h += oldy - my;
 				that.events.onChangeHeight.fire(mySel.h);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 			case 3:
 				mySel.x = mx;
 				that.events.onChangeLocationX.fire(mySel.x);
 				mySel.w += oldx - mx;
 				that.events.onChangeWidth.fire(mySel.w);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 			case 4:
 				mySel.w = mx - oldx;
 				that.events.onChangeWidth.fire(mySel.w);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 			case 5:
 				mySel.x = mx;
@@ -297,16 +302,19 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeWidth.fire(mySel.w);
 				mySel.h = my - oldy;
 				that.events.onChangeHeight.fire(mySel.h);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 			case 6:
 				mySel.h = my - oldy;
 				that.events.onChangeHeight.fire(mySel.h);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 			case 7:
 				mySel.w = mx - oldx;
 				that.events.onChangeWidth.fire(mySel.w);
 				mySel.h = my - oldy;
 				that.events.onChangeHeight.fire(mySel.h);
+				that.events.afterChangeModel.fire(mySel);
 				break;
 		}
 	};
@@ -393,6 +401,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 			}
 		}
+		that.events.afterChangeModel.fire(that.box);
 
 	};
 	var setCursorForHandles = function (style, i) {
@@ -426,44 +435,33 @@ var fluid_1_4 = fluid_1_4 || {};
 	
 	var bindComponentEvents = function (that) {
 		
-		that.events.onChangeHeight.addListener(function (newHeight) {
-			if (that.box != null && that.box.y + newHeight > canvas.height) {
-				that.box.h = canvas.height - that.box.y;
-				that.events.onChangeHeight.fire(that.box.h);
-				invalidate();
+		that.events.afterChangeModel.addListener(function (newModel) {
+			var modelModified = false;
+			if (that.box != null) {
+				if (newModel.y + Math.floor(newModel.h) > canvas.height) {
+					that.box.y = canvas.height - Math.floor(newModel.h);
+					that.events.onChangeLocationY.fire(that.box.y);
+					modelModified = true;
+				}
+				if (newModel.x + Math.floor(newModel.w) > canvas.width) {
+					that.box.x = canvas.width - Math.floor(newModel.w);
+					that.events.onChangeLocationX.fire(that.box.x);
+					modelModified = true;
+				}
+				if (newModel.x < 0) {
+					that.box.x = 0;
+					that.events.onChangeLocationX.fire(that.box.x);
+					modelModified = true;
+				}
+				if (newModel.y < 0) {
+					that.box.y = 0;
+					that.events.onChangeLocationY.fire(that.box.y);
+					modelModified = true;
+				}
 			}
-		});
-		
-		that.events.onChangeWidth.addListener(function (newWidth) {
-			if (that.box != null && that.box.x + newWidth > canvas.width) {
-				that.box.w = canvas.width - that.box.x;
-				that.events.onChangeWidth.fire(that.box.w);
+			if (modelModified) {
 				invalidate();
-			}
-		});
-		
-		that.events.onChangeLocationX.addListener(function (newLocationX) {
-			if (that.box != null && newLocationX < 0) {
-				that.box.x = 0;
-				that.events.onChangeLocationX.fire(that.box.x);
-				invalidate();
-			} else if (that.box != null && newLocationX + that.box.w > canvas.width + 1) {
-				that.box.x = canvas.width - that.box.w;
-				that.events.onChangeLocationX.fire(that.box.x);
-				invalidate();
-			}
-		});
-		
-		that.events.onChangeLocationY.addListener(function (newLocationY) {
-			if (that.box != null && newLocationY < 0) {
-				newLocationY = 0;
-				that.box.y = 0;
-				that.events.onChangeLocationY.fire(that.box.y);
-				invalidate();
-			} else if (that.box != null && newLocationY + that.box.h > canvas.height + 1) {
-				that.box.y = canvas.height - that.box.h;
-				that.events.onChangeLocationY.fire(that.box.y);
-				invalidate();
+				that.events.afterChangeModel.fire(newModel);
 			}
 		});
 	};
@@ -489,11 +487,13 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 				canvasValid = true;
 			}
-			if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex != 8) {
-				selectionHandles[that.highlightedSelectionHandleIndex].highlight(ctx);
-			} else if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex == 8) {
-				if (that.box != null) {
-					that.box.highlight(ctx);
+			if (that.keyHandlerActivated) {
+				if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex != 8) {
+					selectionHandles[that.highlightedSelectionHandleIndex].highlight(ctx);
+				} else if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex == 8) {
+					if (that.box != null) {
+						that.box.highlight(ctx);
+					}
 				}
 			}
 		};
@@ -519,6 +519,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			that.keyboardUpDown = false;
 			that.keyboardRightDown = false;
 			that.keyboardDownDown = false;
+			that.keyHandlerActivated = false;
 
 			//fixes a problem where double clicking causes text to get selected on the canvas
 			canvas.onselectstart = function () {
@@ -588,6 +589,8 @@ var fluid_1_4 = fluid_1_4 || {};
 						mySel.w *= -1;
 						that.events.onChangeWidth.fire(mySel.w);
 					}
+					
+					that.events.afterChangeModel.fire(mySel);
 				}
 			};
 			// Happens when the mouse is moving inside the canvas
@@ -598,6 +601,7 @@ var fluid_1_4 = fluid_1_4 || {};
 					that.events.onChangeLocationX.fire(mySel.x);
 					mySel.y = my - offsety;
 					that.events.onChangeLocationY.fire(mySel.y);
+					that.events.afterChangeModel.fire(mySel);
 					invalidate();
 				} else if (isResizeDrag) {
 					// time ro resize!
@@ -643,63 +647,11 @@ var fluid_1_4 = fluid_1_4 || {};
 					expectResize = -1;
 				}
 			};
-			var cropperKeyDown = function (evt) {
-				switch (evt.which) {
-					case 9:
-						// TAB Key
-						evt.preventDefault();
-						that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
-						invalidate();
-						break;
-					case 37:
-						// Left Arrow
-						that.keyboardLeftDown = true;
-						handleResizeByKeyboard(that);
-						break;
-					case 38:
-						// Up Arrow
-						that.keyboardUpDown = true;
-						handleResizeByKeyboard(that);
-						break;
-					case 39:
-						// Right Arrow
-						that.keyboardRightDown = true;
-						handleResizeByKeyboard(that);
-						break;
-					case 40:
-						// Down Arrow
-						that.keyboardDownDown = true;
-						handleResizeByKeyboard(that);
-						break;
-				}
-			};
-			var cropperKeyUp = function (evt) {
-				switch (evt.which) {
-					case 37:
-						// Left Arrow
-						that.keyboardLeftDown = false;
-						break;
-					case 38:
-						// Up Arrow
-						that.keyboardUpDown = false;
-						break;
-					case 39:
-						// Right Arrow
-						that.keyboardRightDown = false;
-						break;
-					case 40:
-						// Down Arrow
-						that.keyboardDownDown = false;
-						break;
-				}
-			};
+			
 			// set our events. Up and down are for dragging,
 			canvas.onmousedown = cropperMouseDown;
 			canvas.onmouseup = cropperMouseUp;
 			canvas.onmousemove = cropperMouseMove;
-
-			$(document).keydown(cropperKeyDown);
-			$(document).keyup(cropperKeyUp);
 
 			// set up the selection handle boxes
 			for (var i = 0; i < 8; i++) {
@@ -725,7 +677,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeHeight.fire(rect.h);
 				rect.fill = fill;
 				that.box = rect;
-
+				that.events.afterChangeModel.fire(that.box);
 				mySel = that.box;
 				invalidate();
 			};
@@ -734,6 +686,64 @@ var fluid_1_4 = fluid_1_4 || {};
 			
 			bindComponentEvents(that);
 		};
+		
+		var cropperKeyDown = function (evt) {
+			switch (evt.which) {
+				case 9:
+					// TAB Key
+					evt.preventDefault();
+					that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
+					invalidate();
+					break;
+				case 37:
+					// Left Arrow
+					that.keyboardLeftDown = true;
+					handleResizeByKeyboard(that);
+					break;
+				case 38:
+					// Up Arrow
+					that.keyboardUpDown = true;
+					handleResizeByKeyboard(that);
+					break;
+				case 39:
+					// Right Arrow
+					that.keyboardRightDown = true;
+					handleResizeByKeyboard(that);
+					break;
+				case 40:
+					// Down Arrow
+					that.keyboardDownDown = true;
+					handleResizeByKeyboard(that);
+					break;
+			}
+		};
+		var cropperKeyUp = function (evt) {
+			switch (evt.which) {
+				case 37:
+					// Left Arrow
+					that.keyboardLeftDown = false;
+					break;
+				case 38:
+					// Up Arrow
+					that.keyboardUpDown = false;
+					break;
+				case 39:
+					// Right Arrow
+					that.keyboardRightDown = false;
+					break;
+				case 40:
+					// Down Arrow
+					that.keyboardDownDown = false;
+					break;
+			}
+		};
+		
+		that.activateKeyboardAccessibility = function () {
+			that.keyHandlerActivated = true;
+			$(document).keydown(cropperKeyDown);
+			$(document).keyup(cropperKeyUp);
+		};
+		
 		that.reset = function (isNotForCrop) {
 
 			var croppingDimensions = {};
@@ -774,6 +784,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (that.box != null) {
 				that.box.x = newLocationX;
 				that.events.onChangeLocationX.fire(that.box.x);
+				that.events.afterChangeModel.fire(that.box);
 				invalidate();
 			} else {
 				return false;
@@ -784,6 +795,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (that.box != null) {
 				that.box.y = newLocationY;
 				that.events.onChangeLocationY.fire(that.box.y);
+				that.events.afterChangeModel.fire(that.box);
 				invalidate();
 			} else {
 				return false;
@@ -798,6 +810,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 				that.box.w = newWidth;
 				that.events.onChangeWidth.fire(that.box.w);
+				that.events.afterChangeModel.fire(that.box);
 				invalidate();
 			} else {
 				return false;
@@ -812,6 +825,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 				that.box.h = newHeight;
 				that.events.onChangeHeight.fire(that.box.h);
+				that.events.afterChangeModel.fire(that.box);
 				invalidate();
 			} else {
 				return false;
@@ -826,7 +840,8 @@ var fluid_1_4 = fluid_1_4 || {};
 			onChangeHeight: null,
 			onChangeWidth: null,
 			onChangeLocationX: null,
-			onChangeLocationY: null
+			onChangeLocationY: null,
+			afterChangeModel: null
 		}
 	});
 
