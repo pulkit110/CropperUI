@@ -114,13 +114,12 @@ var fluid_1_4 = fluid_1_4 || {};
 
 		selectionHandles[7].x = box.x + box.w - half;
 		selectionHandles[7].y = box.y + box.h - half;
-		
+
 		for (var i = 0; i < 8; ++i) {
 			selectionHandles[i].h = selBoxSize;
 			selectionHandles[i].w = selBoxSize;
 		}
 	};
-	
 	var drawSelectionHandles = function (color, context) {
 		context.fillStyle = color;
 		for (var i = 0; i < 8; i++) {
@@ -128,7 +127,6 @@ var fluid_1_4 = fluid_1_4 || {};
 			context.fillRect(cur.x, cur.y, selBoxSize, selBoxSize);
 		}
 	};
-	
 	// Box object to hold data
 	function Box() {
 		this.x = 0;
@@ -145,7 +143,6 @@ var fluid_1_4 = fluid_1_4 || {};
 			context.lineWidth = selWidth;
 			context.strokeRect(this.x, this.y, this.w, this.h);
 		},
-		
 		// each box is responsible for its own drawing
 		// mainDraw() will call this with the normal canvas
 		// cropperMouseDown will call this with the ghost canvas with 'black'
@@ -203,7 +200,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				// draw the selection handles
 				setupSelectionHandles(this);
 				drawSelectionHandles(selBoxColor, context);
-				
+
 			}
 		} // end draw
 	};
@@ -215,7 +212,6 @@ var fluid_1_4 = fluid_1_4 || {};
 	var clear = function (c) {
 		c.clearRect(0, 0, WIDTH, HEIGHT);
 	};
-	
 	// Sets mx,my to the mouse position relative to the canvas
 	// unfortunately this can be tricky, we have to worry about padding and borders
 	var getMouse = function (e) {
@@ -239,7 +235,6 @@ var fluid_1_4 = fluid_1_4 || {};
 		mx = e.pageX - offsetX;
 		my = e.pageY - offsetY;
 	};
-	
 	var cropImage = function (image, x, y, w, h) {
 
 		//Map x, y, w, h to account for resizeRatio
@@ -258,7 +253,6 @@ var fluid_1_4 = fluid_1_4 || {};
 		return croppedImageDataURL;
 
 	};
-	
 	var handleResize = function(oldx, oldy, that) {
 		// 0  1  2
 		// 3     4
@@ -318,7 +312,6 @@ var fluid_1_4 = fluid_1_4 || {};
 				break;
 		}
 	};
-	
 	var handleResizeByKeyboard = function (that) {
 		// 0  1  2
 		// 3     4
@@ -329,36 +322,40 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeLocationX.fire(that.box.x);
 				invalidate();
 			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 3 || that.highlightedSelectionHandleIndex == 5) {
-				that.box.x--;
-				that.events.onChangeLocationX.fire(that.box.x);
-				that.box.w++;
-				that.events.onChangeWidth.fire(that.box.w);
-				invalidate();
+				if (that.box.x > 0) {	// to prevent the selection box to go beyond the canvas boundary.						
+					that.box.x--;
+					that.events.onChangeLocationX.fire(that.box.x);
+					that.box.w++;
+					that.events.onChangeWidth.fire(that.box.w);
+					invalidate();
+				}
 			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
 				that.box.w--;
 				that.events.onChangeWidth.fire(that.box.w);
 				invalidate();
 			}
 		}
-		
+
 		if (that.keyboardUpDown) {
 			if (that.highlightedSelectionHandleIndex == 8) {
 				that.box.y--;
 				that.events.onChangeLocationY.fire(that.box.y);
 				invalidate();
 			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 1 || that.highlightedSelectionHandleIndex == 2) {
-				that.box.y--;
-				that.events.onChangeLocationY.fire(that.box.y);
-				that.box.h++;
-				that.events.onChangeHeight.fire(that.box.h);
-				invalidate();
+				if (that.box.y > 0) {	// to prevent the selection box to go beyond the canvas boundary.
+					that.box.y--;
+					that.events.onChangeLocationY.fire(that.box.y);
+					that.box.h++;
+					that.events.onChangeHeight.fire(that.box.h);
+					invalidate();
+				}
 			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
 				that.box.h--;
 				that.events.onChangeHeight.fire(that.box.h);
 				invalidate();
 			}
 		}
-		
+
 		if (that.keyboardRightDown) {
 			if (that.highlightedSelectionHandleIndex == 8) {
 				that.box.x++;
@@ -371,12 +368,14 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeWidth.fire(that.box.w);
 				invalidate();
 			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
-				that.box.w++;
-				that.events.onChangeWidth.fire(that.box.w);
-				invalidate();
+				if (that.box.x + that.box.w < canvas.width) {	// to prevent the selection box to go beyond the canvas boundary.
+					that.box.w++;
+					that.events.onChangeWidth.fire(that.box.w);
+					invalidate();
+				}
 			}
 		}
-		
+
 		if (that.keyboardDownDown) {
 			if (that.highlightedSelectionHandleIndex == 8) {
 				that.box.y++;
@@ -389,14 +388,15 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeHeight.fire(that.box.h);
 				invalidate();
 			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
-				that.box.h++;
-				that.events.onChangeHeight.fire(that.box.h);
-				invalidate();
+				if (that.box.y + that.box.h < canvas.height) {	// to prevent the selection box to go beyond the canvas boundary.
+					that.box.h++;
+					that.events.onChangeHeight.fire(that.box.h);
+					invalidate();
+				}
 			}
 		}
-		
+
 	};
-	
 	var setCursorForHandles = function (style, i) {
 		switch (i) {
 			case 0:
@@ -424,6 +424,50 @@ var fluid_1_4 = fluid_1_4 || {};
 				style.cursor = 'se-resize';
 				break;
 		}
+	};
+	
+	var bindComponentEvents = function (that) {
+		
+		that.events.onChangeHeight.addListener(function (newHeight) {
+			if (that.box != null && that.box.y + newHeight > canvas.height) {
+				that.box.h = canvas.height - that.box.y;
+				that.events.onChangeHeight.fire(that.box.h);
+				invalidate();
+			}
+		});
+		
+		that.events.onChangeWidth.addListener(function (newWidth) {
+			if (that.box != null && that.box.x + newWidth > canvas.width) {
+				that.box.w = canvas.width - that.box.x;
+				that.events.onChangeWidth.fire(that.box.w);
+				invalidate();
+			}
+		});
+		
+		that.events.onChangeLocationX.addListener(function (newLocationX) {
+			if (that.box != null && newLocationX < 0) {
+				that.box.x = 0;
+				that.events.onChangeLocationX.fire(that.box.x);
+				invalidate();
+			} else if (that.box != null && newLocationX + that.box.w > canvas.width + 1) {
+				that.box.x = canvas.width - that.box.w;
+				that.events.onChangeLocationX.fire(that.box.x);
+				invalidate();
+			}
+		});
+		
+		that.events.onChangeLocationY.addListener(function (newLocationY) {
+			if (that.box != null && newLocationY < 0) {
+				newLocationY = 0;
+				that.box.y = 0;
+				that.events.onChangeLocationY.fire(that.box.y);
+				invalidate();
+			} else if (that.box != null && newLocationY + that.box.h > canvas.height + 1) {
+				that.box.y = canvas.height - that.box.h;
+				that.events.onChangeLocationY.fire(that.box.y);
+				invalidate();
+			}
+		});
 	};
 	
 	/**
@@ -455,7 +499,6 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 			}
 		};
-		
 		// initialize our canvas, add a ghost canvas, set draw loop
 		// then add everything we want to intially exist on the canvas
 		that.init = function (a_canvas, a_resizeFactor, a_image, a_imageX, a_imageY, a_rectX, a_rectY, a_rectW, a_rectH) {
@@ -472,7 +515,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			ghostcanvas.height = HEIGHT;
 			ghostcanvas.width = WIDTH;
 			gctx = ghostcanvas.getContext('2d');
-			
+
 			that.highlightedSelectionHandleIndex = 0;
 			that.keyboardLeftDown = false;
 			that.keyboardUpDown = false;
@@ -498,10 +541,10 @@ var fluid_1_4 = fluid_1_4 || {};
 			// Happens when the mouse is clicked in the canvas
 			var cropperMouseDown = function (e) {
 				getMouse(e);
-		
+
 				clear(gctx);
 				that.box.draw(gctx, 'black');
-				
+
 				var mouseInBox = false;
 				if (that.box != null) {
 					if (mx >= that.box.x && mx <= that.box.x + that.box.w && my >= that.box.y && my <= that.box.y + that.box.h) {
@@ -519,14 +562,13 @@ var fluid_1_4 = fluid_1_4 || {};
 				if (!mouseInBox) {
 					isDrag = false;
 				}
-				
+
 				//we are over a selection box
 				if (expectResize !== -1) {
 					isResizeDrag = true;
 					return;
 				}
 			};
-			
 			var cropperMouseUp = function () {
 				isDrag = false;
 				isResizeDrag = false;
@@ -589,7 +631,6 @@ var fluid_1_4 = fluid_1_4 || {};
 						// selection handles will always be rectangles
 						if (mx >= cur.x && mx <= cur.x + selBoxSize &&
 						my >= cur.y && my <= cur.y + selBoxSize) {
-							// we found one!
 							expectResize = i;
 							invalidate();
 							setCursorForHandles(this.style, i);
@@ -602,7 +643,6 @@ var fluid_1_4 = fluid_1_4 || {};
 					expectResize = -1;
 				}
 			};
-			
 			var cropperKeyDown = function (evt) {
 				switch (evt.which) {
 					case 9:
@@ -633,7 +673,6 @@ var fluid_1_4 = fluid_1_4 || {};
 						break;
 				}
 			};
-			
 			var cropperKeyUp = function (evt) {
 				switch (evt.which) {
 					case 37:
@@ -654,12 +693,11 @@ var fluid_1_4 = fluid_1_4 || {};
 						break;
 				}
 			};
-			
 			// set our events. Up and down are for dragging,
 			canvas.onmousedown = cropperMouseDown;
 			canvas.onmouseup = cropperMouseUp;
 			canvas.onmousemove = cropperMouseMove;
-			
+
 			$(document).keydown(cropperKeyDown);
 			$(document).keyup(cropperKeyUp);
 
@@ -687,14 +725,15 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeHeight.fire(rect.h);
 				rect.fill = fill;
 				that.box = rect;
-				
+
 				mySel = that.box;
 				invalidate();
 			};
 			// add the rectangle for cropping area
 			addRect(a_rectX, a_rectY, a_rectW, a_rectH, 'rgba(2,165,165,0.0)');
+			
+			bindComponentEvents(that);
 		};
-		
 		that.reset = function (isNotForCrop) {
 
 			var croppingDimensions = {};
@@ -713,7 +752,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (cropperID) {
 				clearInterval(cropperID);
 			}
-			
+
 			that.box = null;
 			if (canvas) {
 				canvas.style.cursor = 'auto';
@@ -727,7 +766,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				invalidate();
 				mainDraw();
 			}
-			
+
 			return [croppedImageDataURL, croppingDimensions];
 
 		};
@@ -790,6 +829,5 @@ var fluid_1_4 = fluid_1_4 || {};
 			onChangeLocationY: null
 		}
 	});
-	//we'll put our default options here
 
 })(jQuery, fluid_1_4);
