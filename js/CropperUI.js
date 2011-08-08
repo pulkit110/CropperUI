@@ -30,16 +30,11 @@ var fluid_1_4 = fluid_1_4 || {};
 	// 5  6  7
 	var selectionHandles = [];
 
-	// Hold canvas information
-	// var canvas;
-	var ctx;
-	var WIDTH;
-	var HEIGHT;
-	var resizeFactor;
-	var image;
+	// var resizeFactor;
+	// var image;
 	var INTERVAL = 20;  // how often, in milliseconds, we check to see if a redraw is needed
-	var imageX;
-	var imageY;
+	// var imageX;
+	// var imageY;
 
 	var isDrag = false;
 	var isResizeDrag = false;
@@ -145,7 +140,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 
 			// We can skip the drawing of elements that have moved off the screen:
-			if (this.x > WIDTH || this.y > HEIGHT) {
+			if (this.x > that.canvas.width || this.y > that.canvas.height) {
 				return;
 			}
 			if (this.x + this.w < 0 || this.y + this.h < 0) {
@@ -176,10 +171,10 @@ var fluid_1_4 = fluid_1_4 || {};
 
 			//draw blurred area around the rectangle
 			context.fillStyle = blurStyle;
-			context.fillRect(0, 0, WIDTH, tempY);
-			context.fillRect(0, tempY, tempX, HEIGHT - tempY);
-			context.fillRect(tempX + tempW, tempY, WIDTH - (tempX + tempW), HEIGHT - tempY);
-			context.fillRect(tempX, tempY + tempH, tempW, HEIGHT - tempY);
+			context.fillRect(0, 0, that.canvas.width, tempY);
+			context.fillRect(0, tempY, tempX, that.canvas.height - tempY);
+			context.fillRect(tempX + tempW, tempY, that.canvas.width - (tempX + tempW), that.canvas.height - tempY);
+			context.fillRect(tempX, tempY + tempH, tempW, that.canvas.height - tempY);
 
 			// draw selection
 			// this is a stroke along the box and also 8 new selection handles
@@ -196,12 +191,12 @@ var fluid_1_4 = fluid_1_4 || {};
 		} // end draw
 	};
 
-	var drawImage = function (imageCanvasContext, image, resizeFactor) {
-		imageCanvasContext.drawImage(image, imageX, imageY, image.width / resizeFactor, image.height / resizeFactor);
+	var drawImage = function (that, imageCanvasContext, image, resizeFactor) {
+		imageCanvasContext.drawImage(image, that.imageX, that.imageY, image.width / resizeFactor, image.height / resizeFactor);
 	};
 	//wipes the canvas context
-	var clear = function (c) {
-		c.clearRect(0, 0, WIDTH, HEIGHT);
+	var clear = function (that, context) {
+		context.clearRect(0, 0, that.canvas.width, that.canvas.height);
 	};
 	// Sets mx,my to the mouse position relative to the canvas
 	// unfortunately this can be tricky, we have to worry about padding and borders
@@ -226,13 +221,13 @@ var fluid_1_4 = fluid_1_4 || {};
 		mx = e.pageX - offsetX;
 		my = e.pageY - offsetY;
 	};
-	var cropImage = function (image, x, y, w, h) {
+	var cropImage = function (that, image, x, y, w, h) {
 
 		//Map x, y, w, h to account for resizeRatio
-		x *= resizeFactor;
-		y *= resizeFactor;
-		w *= resizeFactor;
-		h *= resizeFactor;
+		x *= that.resizeFactor;
+		y *= that.resizeFactor;
+		w *= that.resizeFactor;
+		h *= that.resizeFactor;
 
 		//Create canvas to get cropped image pixels
 		var imageManipulationCanvas = document.createElement('canvas');
@@ -473,38 +468,36 @@ var fluid_1_4 = fluid_1_4 || {};
 		// It only ever does something if the canvas gets invalidated by our code
 		var mainDraw = function () {
 			if (that.canvas && canvasValid === false) {
-				clear(ctx);
-				drawImage(ctx, image, resizeFactor, imageX, imageY);
+				clear(that, that.context);
+				drawImage(that, that.context, that.image, that.resizeFactor, that.imageX, that.imageY);
 				if (that.box != null) {
-					that.box.draw(that, ctx);
+					that.box.draw(that, that.context);
 				}
 				canvasValid = true;
 			}
 			if (that.keyHandlerActivated) {
 				if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex != 8) {
-					selectionHandles[that.highlightedSelectionHandleIndex].highlight(that, ctx);
+					selectionHandles[that.highlightedSelectionHandleIndex].highlight(that, that.context);
 				} else if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex == 8) {
 					if (that.box != null) {
-						that.box.highlight(that, ctx);
+						that.box.highlight(that, that.context);
 					}
 				}
 			}
 		};
 		// initialize our canvas, add a ghost canvas, set draw loop
 		// then add everything we want to intially exist on the canvas
-		that.init = function (a_canvas, a_resizeFactor, a_image, a_imageX, a_imageY, a_rectX, a_rectY, a_rectW, a_rectH) {
-			that.canvas = a_canvas;
-			HEIGHT = that.canvas.height;
-			WIDTH = that.canvas.width;
-			ctx = that.canvas.getContext('2d');
-			resizeFactor = a_resizeFactor;
-			image = a_image;
-			imageX = a_imageX;
-			imageY = a_imageY;
+		that.init = function (canvas, resizeFactor, image, imageX, imageY, a_rectX, a_rectY, a_rectW, a_rectH) {
+			that.canvas = canvas;
+			that.context = that.canvas.getContext('2d');
+			that.resizeFactor = resizeFactor;
+			that.image = image;
+			that.imageX = imageX;
+			that.imageY = imageY;
 
 			ghostcanvas = document.createElement('canvas');
-			ghostcanvas.height = HEIGHT;
-			ghostcanvas.width = WIDTH;
+			ghostcanvas.height = that.canvas.height;
+			ghostcanvas.width = that.canvas.width;
 			gctx = ghostcanvas.getContext('2d');
 
 			that.highlightedSelectionHandleIndex = 0;
@@ -534,7 +527,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			var cropperMouseDown = function (e) {
 				getMouse(that, e);
 
-				clear(gctx);
+				clear(that, gctx);
 				that.box.draw(that, gctx, 'black');
 
 				//we are over a selection box
@@ -554,7 +547,7 @@ var fluid_1_4 = fluid_1_4 || {};
 						isDrag = true;
 						mouseInBox = true;
 						invalidate();
-						clear(gctx);
+						clear(that, gctx);
 					}
 				}
 				if (!mouseInBox) {
@@ -652,10 +645,10 @@ var fluid_1_4 = fluid_1_4 || {};
 				selectionHandles.push(rect);
 			}
 
-			a_rectX = a_rectX ? a_rectX : imageX;
-			a_rectY = a_rectY ? a_rectY : imageY;
-			a_rectW = a_rectW ? a_rectW : image.width / resizeFactor;
-			a_rectH = a_rectH ? a_rectH : image.height / resizeFactor;
+			a_rectX = a_rectX ? a_rectX : that.imageX;
+			a_rectY = a_rectY ? a_rectY : that.imageY;
+			a_rectW = a_rectW ? a_rectW : that.image.width / that.resizeFactor;
+			a_rectH = a_rectH ? a_rectH : that.image.height / that.resizeFactor;
 
 			//Initialize a new Box, add it, and invalidate the canvas
 			var addRect = function (x, y, w, h, fill) {
@@ -745,12 +738,12 @@ var fluid_1_4 = fluid_1_4 || {};
 			var croppedImageDataURL;
 
 			if (that.box != null) {
-				croppingDimensions.x = that.box.x - imageX;
-				croppingDimensions.y = that.box.y - imageY;
+				croppingDimensions.x = that.box.x - that.imageX;
+				croppingDimensions.y = that.box.y - that.imageY;
 				croppingDimensions.w = that.box.w;
 				croppingDimensions.h = that.box.h;
 				if (!isNotForCrop) {
-					croppedImageDataURL = cropImage(image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
+					croppedImageDataURL = cropImage(that, that.image, croppingDimensions.x, croppingDimensions.y, croppingDimensions.w, croppingDimensions.h);
 				}
 			}
 
