@@ -22,31 +22,8 @@ var fluid_1_4 = fluid_1_4 || {};
  **************/
 
 (function ($, fluid) {
-
-	// Holds the 8 tiny boxes that will be our selection handles
-	// the selection handles will be in this order:
-	// 0  1  2
-	// 3     4
-	// 5  6  7
-	var selectionHandles = [];
-
-	// var resizeFactor;
-	// var image;
-	var INTERVAL = 20;  // how often, in milliseconds, we check to see if a redraw is needed
-	// var imageX;
-	// var imageY;
-
-	var isDrag = false;
-	var isResizeDrag = false;
-	var expectResize = -1; // Will save the # of the selection handle if the mouse is over one.
+	
 	var mx, my; // mouse coordinates
-
-	var cropperID;	//ID returned from setInterval
-
-	// when set to true, the canvas will redraw everything
-	// invalidate() just sets this to false right now
-	// we want to call invalidate() whenever we make a change
-	var canvasValid = false;
 
 	// The node (if any) being selected.
 	var mySel = null;
@@ -65,8 +42,8 @@ var fluid_1_4 = fluid_1_4 || {};
 	// Padding and border style widths for mouse offsets
 	var stylePaddingLeft, stylePaddingTop, styleBorderLeft, styleBorderTop;
 
-	var invalidate = function () {
-		canvasValid = false;
+	var invalidate = function (that) {
+		that.canvasValid = false;
 	};
 	var setupSelectionHandles = function(that, box) {
 		var half = that.options.selBoxSize / 2;
@@ -76,42 +53,42 @@ var fluid_1_4 = fluid_1_4 || {};
 		// 5  6  7
 
 		// top left, middle, right
-		selectionHandles[0].x = box.x - half;
-		selectionHandles[0].y = box.y - half;
+		that.selectionHandles[0].x = box.x - half;
+		that.selectionHandles[0].y = box.y - half;
 
-		selectionHandles[1].x = box.x + box.w / 2 - half;
-		selectionHandles[1].y = box.y - half;
+		that.selectionHandles[1].x = box.x + box.w / 2 - half;
+		that.selectionHandles[1].y = box.y - half;
 
-		selectionHandles[2].x = box.x + box.w - half;
-		selectionHandles[2].y = box.y - half;
+		that.selectionHandles[2].x = box.x + box.w - half;
+		that.selectionHandles[2].y = box.y - half;
 
 		//middle left
-		selectionHandles[3].x = box.x - half;
-		selectionHandles[3].y = box.y + box.h / 2 - half;
+		that.selectionHandles[3].x = box.x - half;
+		that.selectionHandles[3].y = box.y + box.h / 2 - half;
 
 		//middle right
-		selectionHandles[4].x = box.x + box.w - half;
-		selectionHandles[4].y = box.y + box.h / 2 - half;
+		that.selectionHandles[4].x = box.x + box.w - half;
+		that.selectionHandles[4].y = box.y + box.h / 2 - half;
 
 		//bottom left, middle, right
-		selectionHandles[6].x = box.x + box.w / 2 - half;
-		selectionHandles[6].y = box.y + box.h - half;
+		that.selectionHandles[6].x = box.x + box.w / 2 - half;
+		that.selectionHandles[6].y = box.y + box.h - half;
 
-		selectionHandles[5].x = box.x - half;
-		selectionHandles[5].y = box.y + box.h - half;
+		that.selectionHandles[5].x = box.x - half;
+		that.selectionHandles[5].y = box.y + box.h - half;
 
-		selectionHandles[7].x = box.x + box.w - half;
-		selectionHandles[7].y = box.y + box.h - half;
+		that.selectionHandles[7].x = box.x + box.w - half;
+		that.selectionHandles[7].y = box.y + box.h - half;
 
 		for (var i = 0; i < 8; ++i) {
-			selectionHandles[i].h = that.options.selBoxSize;
-			selectionHandles[i].w = that.options.selBoxSize;
+			that.selectionHandles[i].h = that.options.selBoxSize;
+			that.selectionHandles[i].w = that.options.selBoxSize;
 		}
 	};
 	var drawSelectionHandles = function (that, context) {
 		context.fillStyle = that.options.selBoxColor;
 		for (var i = 0; i < 8; i++) {
-			var cur = selectionHandles[i];
+			var cur = that.selectionHandles[i];
 			context.fillRect(cur.x, cur.y, that.options.selBoxSize, that.options.selBoxSize);
 		}
 	};
@@ -243,7 +220,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		// 0  1  2
 		// 3     4
 		// 5  6  7
-		switch (expectResize) {
+		switch (that.expectResize) {
 			case 0:
 				mySel.x = mx;
 				that.events.onChangeLocationX.fire(mySel.x);
@@ -314,19 +291,19 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (that.highlightedSelectionHandleIndex == 8) {
 				that.box.x--;
 				that.events.onChangeLocationX.fire(that.box.x);
-				invalidate();
+				invalidate(that);
 			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 3 || that.highlightedSelectionHandleIndex == 5) {
 				if (that.box.x > 0) {	// to prevent the selection box to go beyond the canvas boundary.						
 					that.box.x--;
 					that.events.onChangeLocationX.fire(that.box.x);
 					that.box.w++;
 					that.events.onChangeWidth.fire(that.box.w);
-					invalidate();
+					invalidate(that);
 				}
 			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
 				that.box.w--;
 				that.events.onChangeWidth.fire(that.box.w);
-				invalidate();
+				invalidate(that);
 			}
 		}
 
@@ -334,19 +311,19 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (that.highlightedSelectionHandleIndex == 8) {
 				that.box.y--;
 				that.events.onChangeLocationY.fire(that.box.y);
-				invalidate();
+				invalidate(that);
 			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 1 || that.highlightedSelectionHandleIndex == 2) {
 				if (that.box.y > 0) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.y--;
 					that.events.onChangeLocationY.fire(that.box.y);
 					that.box.h++;
 					that.events.onChangeHeight.fire(that.box.h);
-					invalidate();
+					invalidate(that);
 				}
 			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
 				that.box.h--;
 				that.events.onChangeHeight.fire(that.box.h);
-				invalidate();
+				invalidate(that);
 			}
 		}
 
@@ -354,18 +331,18 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (that.highlightedSelectionHandleIndex == 8) {
 				that.box.x++;
 				that.events.onChangeLocationX.fire(that.box.x);
-				invalidate();
+				invalidate(that);
 			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 3 || that.highlightedSelectionHandleIndex == 5) {
 				that.box.x++;
 				that.events.onChangeLocationX.fire(that.box.x);
 				that.box.w--;
 				that.events.onChangeWidth.fire(that.box.w);
-				invalidate();
+				invalidate(that);
 			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
 				if (that.box.x + that.box.w < that.canvas.width) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.w++;
 					that.events.onChangeWidth.fire(that.box.w);
-					invalidate();
+					invalidate(that);
 				}
 			}
 		}
@@ -374,18 +351,18 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (that.highlightedSelectionHandleIndex == 8) {
 				that.box.y++;
 				that.events.onChangeLocationY.fire(that.box.y);
-				invalidate();
+				invalidate(that);
 			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 1 || that.highlightedSelectionHandleIndex == 2) {
 				that.box.y++;
 				that.events.onChangeLocationY.fire(that.box.y);
 				that.box.h--;
 				that.events.onChangeHeight.fire(that.box.h);
-				invalidate();
+				invalidate(that);
 			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
 				if (that.box.y + that.box.h < that.canvas.height) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.h++;
 					that.events.onChangeHeight.fire(that.box.h);
-					invalidate();
+					invalidate(that);
 				}
 			}
 		}
@@ -448,7 +425,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 			}
 			if (modelModified) {
-				invalidate();
+				invalidate(that);
 				that.events.afterChangeModel.fire(newModel);
 			}
 		});
@@ -467,17 +444,17 @@ var fluid_1_4 = fluid_1_4 || {};
 		// While draw is called as often as the INTERVAL variable demands,
 		// It only ever does something if the canvas gets invalidated by our code
 		var mainDraw = function () {
-			if (that.canvas && canvasValid === false) {
+			if (that.canvas && that.canvasValid === false) {
 				clear(that, that.context);
 				drawImage(that, that.context, that.image, that.resizeFactor, that.imageX, that.imageY);
 				if (that.box != null) {
 					that.box.draw(that, that.context);
 				}
-				canvasValid = true;
+				that.canvasValid = true;
 			}
 			if (that.keyHandlerActivated) {
 				if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex != 8) {
-					selectionHandles[that.highlightedSelectionHandleIndex].highlight(that, that.context);
+					that.selectionHandles[that.highlightedSelectionHandleIndex].highlight(that, that.context);
 				} else if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex == 8) {
 					if (that.box != null) {
 						that.box.highlight(that, that.context);
@@ -506,7 +483,23 @@ var fluid_1_4 = fluid_1_4 || {};
 			that.keyboardRightDown = false;
 			that.keyboardDownDown = false;
 			that.keyHandlerActivated = false;
-
+			
+			// Holds the 8 tiny boxes that will be our selection handles
+			// the selection handles will be in this order:
+			// 0  1  2
+			// 3     4
+			// 5  6  7
+			that.selectionHandles = [];
+			
+			that.isDrag = false;
+			that.isResizeDrag = false;
+			that.expectResize = -1; // Will save the # of the selection handle if the mouse is over one.
+			
+			// when set to true, the canvas will redraw everything in the next call of mainDraw
+			// invalidate() just sets this to false
+			// we want to call invalidate() whenever we make a change
+			that.canvasValid = false;
+	
 			//fixes a problem where double clicking causes text to get selected on the canvas
 			that.canvas.onselectstart = function () {
 				return false;
@@ -521,7 +514,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 
 			// make mainDraw() fire every INTERVAL milliseconds
-			cropperID = setInterval(mainDraw, INTERVAL);
+			that.cropperID = setInterval(mainDraw, that.options.INTERVAL);
 
 			// Happens when the mouse is clicked in the canvas
 			var cropperMouseDown = function (e) {
@@ -531,8 +524,8 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.box.draw(that, gctx, 'black');
 
 				//we are over a selection box
-				if (expectResize !== -1) {
-					isResizeDrag = true;
+				if (that.expectResize !== -1) {
+					that.isResizeDrag = true;
 					return;
 				}
 				
@@ -544,22 +537,22 @@ var fluid_1_4 = fluid_1_4 || {};
 						offsety = my - mySel.y;
 						mySel.x = mx - offsetx;
 						mySel.y = my - offsety;
-						isDrag = true;
+						that.isDrag = true;
 						mouseInBox = true;
-						invalidate();
+						invalidate(that);
 						clear(that, gctx);
 					}
 				}
 				if (!mouseInBox) {
-					isDrag = false;
+					that.isDrag = false;
 				}
 
 				
 			};
 			var cropperMouseUp = function () {
-				isDrag = false;
-				isResizeDrag = false;
-				expectResize = -1;
+				that.isDrag = false;
+				that.isResizeDrag = false;
+				that.expectResize = -1;
 
 				if (mySel) {
 					if (mySel.h < 0) {
@@ -581,20 +574,20 @@ var fluid_1_4 = fluid_1_4 || {};
 			};
 			// Happens when the mouse is moving inside the canvas
 			var cropperMouseMove = function (e) {
-				if (isDrag) {
+				if (that.isDrag) {
 					getMouse(that, e);
 					mySel.x = mx - offsetx;
 					that.events.onChangeLocationX.fire(mySel.x);
 					mySel.y = my - offsety;
 					that.events.onChangeLocationY.fire(mySel.y);
 					that.events.afterChangeModel.fire(mySel);
-					invalidate();
-				} else if (isResizeDrag) {
+					invalidate(that);
+				} else if (that.isResizeDrag) {
 					// time ro resize!
 					var oldx = mySel.x;
 					var oldy = mySel.y;
 					handleResize(oldx, oldy, that);
-					invalidate();
+					invalidate(that);
 				}
 
 				getMouse(that, e);
@@ -611,26 +604,26 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 
 				// if there's a selection see if we grabbed one of the selection handles
-				if (mySel !== null && !isResizeDrag) {
+				if (mySel !== null && !that.isResizeDrag) {
 					for (i = 0; i < 8; i++) {
 						// 0  1  2
 						// 3     4
 						// 5  6  7
-						var cur = selectionHandles[i];
+						var cur = that.selectionHandles[i];
 						// we dont need to use the ghost context because
 						// selection handles will always be rectangles
 						if (mx >= cur.x && mx <= cur.x + that.options.selBoxSize &&
 						my >= cur.y && my <= cur.y + that.options.selBoxSize) {
-							expectResize = i;
-							invalidate();
+							that.expectResize = i;
+							invalidate(that);
 							setCursorForHandles(this.style, i);
 							return;
 						}
 
 					}
 					// not over a selection box, return to normal
-					isResizeDrag = false;
-					expectResize = -1;
+					that.isResizeDrag = false;
+					that.expectResize = -1;
 				}
 			};
 			
@@ -642,7 +635,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			// set up the selection handle boxes
 			for (var i = 0; i < 8; i++) {
 				var rect = new Box();
-				selectionHandles.push(rect);
+				that.selectionHandles.push(rect);
 			}
 
 			a_rectX = a_rectX ? a_rectX : that.imageX;
@@ -665,7 +658,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.box = rect;
 				that.events.afterChangeModel.fire(that.box);
 				mySel = that.box;
-				invalidate();
+				invalidate(that);
 			};
 			// add the rectangle for cropping area
 			addRect(a_rectX, a_rectY, a_rectW, a_rectH, 'rgba(2,165,165,0.0)');
@@ -679,7 +672,7 @@ var fluid_1_4 = fluid_1_4 || {};
 					// TAB Key
 					evt.preventDefault();
 					that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
-					invalidate();
+					invalidate(that);
 					break;
 				case 37:
 					// Left Arrow
@@ -747,8 +740,8 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 			}
 
-			if (cropperID) {
-				clearInterval(cropperID);
+			if (that.cropperID) {
+				clearInterval(that.cropperID);
 			}
 
 			that.box = null;
@@ -761,7 +754,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				$(document).unbind('keyup');
 			}
 			if (isNotForCrop) {
-				invalidate();
+				invalidate(that);
 				mainDraw();
 			}
 
@@ -773,7 +766,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.box.x = newLocationX;
 				that.events.onChangeLocationX.fire(that.box.x);
 				that.events.afterChangeModel.fire(that.box);
-				invalidate();
+				invalidate(that);
 			} else {
 				return false;
 			}
@@ -784,7 +777,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.box.y = newLocationY;
 				that.events.onChangeLocationY.fire(that.box.y);
 				that.events.afterChangeModel.fire(that.box);
-				invalidate();
+				invalidate(that);
 			} else {
 				return false;
 			}
@@ -799,7 +792,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.box.w = newWidth;
 				that.events.onChangeWidth.fire(that.box.w);
 				that.events.afterChangeModel.fire(that.box);
-				invalidate();
+				invalidate(that);
 			} else {
 				return false;
 			}
@@ -814,7 +807,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.box.h = newHeight;
 				that.events.onChangeHeight.fire(that.box.h);
 				that.events.afterChangeModel.fire(that.box);
-				invalidate();
+				invalidate(that);
 			} else {
 				return false;
 			}
@@ -835,7 +828,8 @@ var fluid_1_4 = fluid_1_4 || {};
 		selBoxColor: 'darkred',
 		borderColor: '#CC0000',
 		borderWidth: 0, 
-		highlightColor: 'yellow'
+		highlightColor: 'yellow',
+		INTERVAL: 20  // how often, in milliseconds, we check to see if a redraw is needed
 	});
 
 })(jQuery, fluid_1_4);
