@@ -31,7 +31,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	var selectionHandles = [];
 
 	// Hold canvas information
-	var canvas;
+	// var canvas;
 	var ctx;
 	var WIDTH;
 	var HEIGHT;
@@ -56,13 +56,6 @@ var fluid_1_4 = fluid_1_4 || {};
 	// The node (if any) being selected.
 	var mySel = null;
 
-	// The selection color and width. Right now we have a red selection with a small width
-	var selColor = '#CC0000';
-	var selWidth = 0;
-	var selBoxColor = 'darkred'; // Selection boxes
-	var selBoxSize = 6;
-	var highlightColor = 'yellow';
-
 	var blurStyle = 'rgba(255,255,255,0.4)';
 
 	// we use a fake canvas to draw individual shapes for selection testing
@@ -80,8 +73,8 @@ var fluid_1_4 = fluid_1_4 || {};
 	var invalidate = function () {
 		canvasValid = false;
 	};
-	var setupSelectionHandles = function(box) {
-		var half = selBoxSize / 2;
+	var setupSelectionHandles = function(that, box) {
+		var half = that.options.selBoxSize / 2;
 
 		// 0  1  2
 		// 3     4
@@ -116,15 +109,15 @@ var fluid_1_4 = fluid_1_4 || {};
 		selectionHandles[7].y = box.y + box.h - half;
 
 		for (var i = 0; i < 8; ++i) {
-			selectionHandles[i].h = selBoxSize;
-			selectionHandles[i].w = selBoxSize;
+			selectionHandles[i].h = that.options.selBoxSize;
+			selectionHandles[i].w = that.options.selBoxSize;
 		}
 	};
-	var drawSelectionHandles = function (color, context) {
-		context.fillStyle = color;
+	var drawSelectionHandles = function (that, context) {
+		context.fillStyle = that.options.selBoxColor;
 		for (var i = 0; i < 8; i++) {
 			var cur = selectionHandles[i];
-			context.fillRect(cur.x, cur.y, selBoxSize, selBoxSize);
+			context.fillRect(cur.x, cur.y, that.options.selBoxSize, that.options.selBoxSize);
 		}
 	};
 	// Box object to hold data
@@ -137,14 +130,14 @@ var fluid_1_4 = fluid_1_4 || {};
 	}
 
 	Box.prototype = {
-		highlight: function (context) {
-			context.strokeStyle = highlightColor;
-			context.lineWidth = selWidth;
+		highlight: function (that, context) {
+			context.strokeStyle = that.options.highlightColor;
+			context.lineWidth = that.options.borderWidth;
 			context.strokeRect(this.x, this.y, this.w, this.h);
 		},
 		
 		// mainDraw() will call this with the normal canvas
-		draw: function (context, optionalColor) {
+		draw: function (that, context, optionalColor) {
 			if (context === gctx) {
 				context.fillStyle = 'black'; // always want black for the ghost canvas
 			} else {
@@ -191,13 +184,13 @@ var fluid_1_4 = fluid_1_4 || {};
 			// draw selection
 			// this is a stroke along the box and also 8 new selection handles
 			if (mySel === this) {
-				context.strokeStyle = selColor;
-				context.lineWidth = selWidth;
+				context.strokeStyle = that.options.borderColor;
+				context.lineWidth = that.options.borderWidth;
 				context.strokeRect(this.x, this.y, this.w, this.h);
 
 				// draw the selection handles
-				setupSelectionHandles(this);
-				drawSelectionHandles(selBoxColor, context);
+				setupSelectionHandles(that, this);
+				drawSelectionHandles(that, context);
 
 			}
 		} // end draw
@@ -212,8 +205,8 @@ var fluid_1_4 = fluid_1_4 || {};
 	};
 	// Sets mx,my to the mouse position relative to the canvas
 	// unfortunately this can be tricky, we have to worry about padding and borders
-	var getMouse = function (e) {
-		var element = canvas, offsetX = 0, offsetY = 0;
+	var getMouse = function (that, e) {
+		var element = that.canvas, offsetX = 0, offsetY = 0;
 
 		if (element.offsetParent) {
 			do {
@@ -374,7 +367,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeWidth.fire(that.box.w);
 				invalidate();
 			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
-				if (that.box.x + that.box.w < canvas.width) {	// to prevent the selection box to go beyond the canvas boundary.
+				if (that.box.x + that.box.w < that.canvas.width) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.w++;
 					that.events.onChangeWidth.fire(that.box.w);
 					invalidate();
@@ -394,7 +387,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.events.onChangeHeight.fire(that.box.h);
 				invalidate();
 			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
-				if (that.box.y + that.box.h < canvas.height) {	// to prevent the selection box to go beyond the canvas boundary.
+				if (that.box.y + that.box.h < that.canvas.height) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.h++;
 					that.events.onChangeHeight.fire(that.box.h);
 					invalidate();
@@ -438,13 +431,13 @@ var fluid_1_4 = fluid_1_4 || {};
 		that.events.afterChangeModel.addListener(function (newModel) {
 			var modelModified = false;
 			if (that.box != null) {
-				if (newModel.y + Math.floor(newModel.h) > canvas.height) {
-					that.box.y = canvas.height - Math.floor(newModel.h);
+				if (newModel.y + Math.floor(newModel.h) > that.canvas.height) {
+					that.box.y = that.canvas.height - Math.floor(newModel.h);
 					that.events.onChangeLocationY.fire(that.box.y);
 					modelModified = true;
 				}
-				if (newModel.x + Math.floor(newModel.w) > canvas.width) {
-					that.box.x = canvas.width - Math.floor(newModel.w);
+				if (newModel.x + Math.floor(newModel.w) > that.canvas.width) {
+					that.box.x = that.canvas.width - Math.floor(newModel.w);
 					that.events.onChangeLocationX.fire(that.box.x);
 					modelModified = true;
 				}
@@ -479,20 +472,20 @@ var fluid_1_4 = fluid_1_4 || {};
 		// While draw is called as often as the INTERVAL variable demands,
 		// It only ever does something if the canvas gets invalidated by our code
 		var mainDraw = function () {
-			if (canvas && canvasValid === false) {
+			if (that.canvas && canvasValid === false) {
 				clear(ctx);
 				drawImage(ctx, image, resizeFactor, imageX, imageY);
 				if (that.box != null) {
-					that.box.draw(ctx);
+					that.box.draw(that, ctx);
 				}
 				canvasValid = true;
 			}
 			if (that.keyHandlerActivated) {
 				if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex != 8) {
-					selectionHandles[that.highlightedSelectionHandleIndex].highlight(ctx);
+					selectionHandles[that.highlightedSelectionHandleIndex].highlight(that, ctx);
 				} else if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex == 8) {
 					if (that.box != null) {
-						that.box.highlight(ctx);
+						that.box.highlight(that, ctx);
 					}
 				}
 			}
@@ -500,10 +493,10 @@ var fluid_1_4 = fluid_1_4 || {};
 		// initialize our canvas, add a ghost canvas, set draw loop
 		// then add everything we want to intially exist on the canvas
 		that.init = function (a_canvas, a_resizeFactor, a_image, a_imageX, a_imageY, a_rectX, a_rectY, a_rectW, a_rectH) {
-			canvas = a_canvas;
-			HEIGHT = canvas.height;
-			WIDTH = canvas.width;
-			ctx = canvas.getContext('2d');
+			that.canvas = a_canvas;
+			HEIGHT = that.canvas.height;
+			WIDTH = that.canvas.width;
+			ctx = that.canvas.getContext('2d');
 			resizeFactor = a_resizeFactor;
 			image = a_image;
 			imageX = a_imageX;
@@ -522,16 +515,16 @@ var fluid_1_4 = fluid_1_4 || {};
 			that.keyHandlerActivated = false;
 
 			//fixes a problem where double clicking causes text to get selected on the canvas
-			canvas.onselectstart = function () {
+			that.canvas.onselectstart = function () {
 				return false;
 			};
 			// fixes mouse co-ordinate problems when there's a border or padding
 			// see getMouse for more detail
 			if (document.defaultView && document.defaultView.getComputedStyle) {
-				stylePaddingLeft = parseInt(document.defaultView.getComputedStyle(canvas, null).paddingLeft, 10)     || 0;
-				stylePaddingTop  = parseInt(document.defaultView.getComputedStyle(canvas, null).paddingTop, 10)      || 0;
-				styleBorderLeft  = parseInt(document.defaultView.getComputedStyle(canvas, null).borderLeftWidth, 10) || 0;
-				styleBorderTop   = parseInt(document.defaultView.getComputedStyle(canvas, null).borderTopWidth, 10)  || 0;
+				stylePaddingLeft = parseInt(document.defaultView.getComputedStyle(that.canvas, null).paddingLeft, 10)     || 0;
+				stylePaddingTop  = parseInt(document.defaultView.getComputedStyle(that.canvas, null).paddingTop, 10)      || 0;
+				styleBorderLeft  = parseInt(document.defaultView.getComputedStyle(that.canvas, null).borderLeftWidth, 10) || 0;
+				styleBorderTop   = parseInt(document.defaultView.getComputedStyle(that.canvas, null).borderTopWidth, 10)  || 0;
 			}
 
 			// make mainDraw() fire every INTERVAL milliseconds
@@ -539,10 +532,10 @@ var fluid_1_4 = fluid_1_4 || {};
 
 			// Happens when the mouse is clicked in the canvas
 			var cropperMouseDown = function (e) {
-				getMouse(e);
+				getMouse(that, e);
 
 				clear(gctx);
-				that.box.draw(gctx, 'black');
+				that.box.draw(that, gctx, 'black');
 
 				//we are over a selection box
 				if (expectResize !== -1) {
@@ -596,7 +589,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			// Happens when the mouse is moving inside the canvas
 			var cropperMouseMove = function (e) {
 				if (isDrag) {
-					getMouse(e);
+					getMouse(that, e);
 					mySel.x = mx - offsetx;
 					that.events.onChangeLocationX.fire(mySel.x);
 					mySel.y = my - offsety;
@@ -611,7 +604,7 @@ var fluid_1_4 = fluid_1_4 || {};
 					invalidate();
 				}
 
-				getMouse(e);
+				getMouse(that, e);
 
 				var mouseInBox = false;
 				if (that.box != null) {
@@ -633,8 +626,8 @@ var fluid_1_4 = fluid_1_4 || {};
 						var cur = selectionHandles[i];
 						// we dont need to use the ghost context because
 						// selection handles will always be rectangles
-						if (mx >= cur.x && mx <= cur.x + selBoxSize &&
-						my >= cur.y && my <= cur.y + selBoxSize) {
+						if (mx >= cur.x && mx <= cur.x + that.options.selBoxSize &&
+						my >= cur.y && my <= cur.y + that.options.selBoxSize) {
 							expectResize = i;
 							invalidate();
 							setCursorForHandles(this.style, i);
@@ -649,9 +642,9 @@ var fluid_1_4 = fluid_1_4 || {};
 			};
 			
 			// set our events. Up and down are for dragging,
-			canvas.onmousedown = cropperMouseDown;
-			canvas.onmouseup = cropperMouseUp;
-			canvas.onmousemove = cropperMouseMove;
+			that.canvas.onmousedown = cropperMouseDown;
+			that.canvas.onmouseup = cropperMouseUp;
+			that.canvas.onmousemove = cropperMouseMove;
 
 			// set up the selection handle boxes
 			for (var i = 0; i < 8; i++) {
@@ -766,11 +759,11 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 
 			that.box = null;
-			if (canvas) {
-				canvas.style.cursor = 'auto';
-				canvas.onmousedown = null;
-				canvas.onmouseup = null;
-				canvas.onmousemove = null;
+			if (that.canvas) {
+				that.canvas.style.cursor = 'auto';
+				that.canvas.onmousedown = null;
+				that.canvas.onmouseup = null;
+				that.canvas.onmousemove = null;
 				$(document).unbind('keydown');
 				$(document).unbind('keyup');
 			}
@@ -844,7 +837,12 @@ var fluid_1_4 = fluid_1_4 || {};
 			onChangeLocationX: null,
 			onChangeLocationY: null,
 			afterChangeModel: null
-		}
+		},
+		selBoxSize: 6,
+		selBoxColor: 'darkred',
+		borderColor: '#CC0000',
+		borderWidth: 0, 
+		highlightColor: 'yellow'
 	});
 
 })(jQuery, fluid_1_4);
