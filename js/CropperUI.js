@@ -33,7 +33,7 @@ var fluid_1_4 = fluid_1_4 || {};
 	/**
 	 * Setup the selection handles for given box
 	 */
-	var setupSelectionHandles = function(that, box) {
+	var setupSelectionHandles = function (that, box) {
 		var half = that.options.selBoxSize / 2;
 
 		// 0  1  2
@@ -228,71 +228,71 @@ var fluid_1_4 = fluid_1_4 || {};
 	/**
 	 * Handle resize of bounding box by selection handles
 	 */
-	var handleResize = function(oldx, oldy, that) {
+	var handleResize = function (oldx, oldy, that) {
 		// 0  1  2
 		// 3     4
 		// 5  6  7
 		switch (that.expectResize) {
-			case 0:
-				that.selectedBox.x = that.mx;
-				that.events.onChangeLocationX.fire(that.selectedBox.x);
-				that.selectedBox.y = that.my;
-				that.events.onChangeLocationY.fire(that.selectedBox.y);
-				that.selectedBox.w += oldx - that.mx;
-				that.events.onChangeWidth.fire(that.selectedBox.w);
-				that.selectedBox.h += oldy - that.my;
-				that.events.onChangeHeight.fire(that.selectedBox.h);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
-			case 1:
-				that.selectedBox.y = that.my;
-				that.events.onChangeLocationY.fire(that.selectedBox.y);
-				that.selectedBox.h += oldy - that.my;
-				that.events.onChangeHeight.fire(that.selectedBox.h);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
-			case 2:
-				that.selectedBox.y = that.my;
-				that.events.onChangeLocationY.fire(that.selectedBox.y);
-				that.selectedBox.w = that.mx - oldx;
-				that.events.onChangeWidth.fire(that.selectedBox.w);
-				that.selectedBox.h += oldy - that.my;
-				that.events.onChangeHeight.fire(that.selectedBox.h);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
-			case 3:
-				that.selectedBox.x = that.mx;
-				that.events.onChangeLocationX.fire(that.selectedBox.x);
-				that.selectedBox.w += oldx - that.mx;
-				that.events.onChangeWidth.fire(that.selectedBox.w);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
-			case 4:
-				that.selectedBox.w = that.mx - oldx;
-				that.events.onChangeWidth.fire(that.selectedBox.w);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
-			case 5:
-				that.selectedBox.x = that.mx;
-				that.events.onChangeLocationX.fire(that.selectedBox.x);
-				that.selectedBox.w += oldx - that.mx;
-				that.events.onChangeWidth.fire(that.selectedBox.w);
-				that.selectedBox.h = that.my - oldy;
-				that.events.onChangeHeight.fire(that.selectedBox.h);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
-			case 6:
-				that.selectedBox.h = that.my - oldy;
-				that.events.onChangeHeight.fire(that.selectedBox.h);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
-			case 7:
-				that.selectedBox.w = that.mx - oldx;
-				that.events.onChangeWidth.fire(that.selectedBox.w);
-				that.selectedBox.h = that.my - oldy;
-				that.events.onChangeHeight.fire(that.selectedBox.h);
-				that.events.afterChangeModel.fire(that.selectedBox);
-				break;
+		case 0:
+			that.selectedBox.x = that.mx;
+			that.events.onChangeLocationX.fire(that.selectedBox.x);
+			that.selectedBox.y = that.my;
+			that.events.onChangeLocationY.fire(that.selectedBox.y);
+			that.selectedBox.w += oldx - that.mx;
+			that.events.onChangeWidth.fire(that.selectedBox.w);
+			that.selectedBox.h += oldy - that.my;
+			that.events.onChangeHeight.fire(that.selectedBox.h);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
+		case 1:
+			that.selectedBox.y = that.my;
+			that.events.onChangeLocationY.fire(that.selectedBox.y);
+			that.selectedBox.h += oldy - that.my;
+			that.events.onChangeHeight.fire(that.selectedBox.h);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
+		case 2:
+			that.selectedBox.y = that.my;
+			that.events.onChangeLocationY.fire(that.selectedBox.y);
+			that.selectedBox.w = that.mx - oldx;
+			that.events.onChangeWidth.fire(that.selectedBox.w);
+			that.selectedBox.h += oldy - that.my;
+			that.events.onChangeHeight.fire(that.selectedBox.h);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
+		case 3:
+			that.selectedBox.x = that.mx;
+			that.events.onChangeLocationX.fire(that.selectedBox.x);
+			that.selectedBox.w += oldx - that.mx;
+			that.events.onChangeWidth.fire(that.selectedBox.w);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
+		case 4:
+			that.selectedBox.w = that.mx - oldx;
+			that.events.onChangeWidth.fire(that.selectedBox.w);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
+		case 5:
+			that.selectedBox.x = that.mx;
+			that.events.onChangeLocationX.fire(that.selectedBox.x);
+			that.selectedBox.w += oldx - that.mx;
+			that.events.onChangeWidth.fire(that.selectedBox.w);
+			that.selectedBox.h = that.my - oldy;
+			that.events.onChangeHeight.fire(that.selectedBox.h);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
+		case 6:
+			that.selectedBox.h = that.my - oldy;
+			that.events.onChangeHeight.fire(that.selectedBox.h);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
+		case 7:
+			that.selectedBox.w = that.mx - oldx;
+			that.events.onChangeWidth.fire(that.selectedBox.w);
+			that.selectedBox.h = that.my - oldy;
+			that.events.onChangeHeight.fire(that.selectedBox.h);
+			that.events.afterChangeModel.fire(that.selectedBox);
+			break;
 		}
 	};
 	
@@ -304,11 +304,11 @@ var fluid_1_4 = fluid_1_4 || {};
 		// 3     4
 		// 5  6  7
 		if (that.keyboardLeftDown) {
-			if (that.highlightedSelectionHandleIndex == 8) {
+			if (that.highlightedSelectionHandleIndex === 8) {
 				that.box.x--;
 				that.events.onChangeLocationX.fire(that.box.x);
 				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 3 || that.highlightedSelectionHandleIndex == 5) {
+			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 3 || that.highlightedSelectionHandleIndex === 5) {
 				if (that.box.x > 0) {	// to prevent the selection box to go beyond the canvas boundary.						
 					that.box.x--;
 					that.events.onChangeLocationX.fire(that.box.x);
@@ -316,7 +316,7 @@ var fluid_1_4 = fluid_1_4 || {};
 					that.events.onChangeWidth.fire(that.box.w);
 					invalidate(that);
 				}
-			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
+			} else if (that.highlightedSelectionHandleIndex === 2 || that.highlightedSelectionHandleIndex === 4 || that.highlightedSelectionHandleIndex === 7) {
 				that.box.w--;
 				that.events.onChangeWidth.fire(that.box.w);
 				invalidate(that);
@@ -324,11 +324,11 @@ var fluid_1_4 = fluid_1_4 || {};
 		}
 
 		if (that.keyboardUpDown) {
-			if (that.highlightedSelectionHandleIndex == 8) {
+			if (that.highlightedSelectionHandleIndex === 8) {
 				that.box.y--;
 				that.events.onChangeLocationY.fire(that.box.y);
 				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 1 || that.highlightedSelectionHandleIndex == 2) {
+			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 1 || that.highlightedSelectionHandleIndex === 2) {
 				if (that.box.y > 0) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.y--;
 					that.events.onChangeLocationY.fire(that.box.y);
@@ -336,7 +336,7 @@ var fluid_1_4 = fluid_1_4 || {};
 					that.events.onChangeHeight.fire(that.box.h);
 					invalidate(that);
 				}
-			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
+			} else if (that.highlightedSelectionHandleIndex === 5 || that.highlightedSelectionHandleIndex === 6 || that.highlightedSelectionHandleIndex === 7) {
 				that.box.h--;
 				that.events.onChangeHeight.fire(that.box.h);
 				invalidate(that);
@@ -344,17 +344,17 @@ var fluid_1_4 = fluid_1_4 || {};
 		}
 
 		if (that.keyboardRightDown) {
-			if (that.highlightedSelectionHandleIndex == 8) {
+			if (that.highlightedSelectionHandleIndex === 8) {
 				that.box.x++;
 				that.events.onChangeLocationX.fire(that.box.x);
 				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 3 || that.highlightedSelectionHandleIndex == 5) {
+			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 3 || that.highlightedSelectionHandleIndex === 5) {
 				that.box.x++;
 				that.events.onChangeLocationX.fire(that.box.x);
 				that.box.w--;
 				that.events.onChangeWidth.fire(that.box.w);
 				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex == 2 || that.highlightedSelectionHandleIndex == 4 || that.highlightedSelectionHandleIndex == 7) {
+			} else if (that.highlightedSelectionHandleIndex === 2 || that.highlightedSelectionHandleIndex === 4 || that.highlightedSelectionHandleIndex === 7) {
 				if (that.box.x + that.box.w < that.canvas.width) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.w++;
 					that.events.onChangeWidth.fire(that.box.w);
@@ -364,17 +364,17 @@ var fluid_1_4 = fluid_1_4 || {};
 		}
 
 		if (that.keyboardDownDown) {
-			if (that.highlightedSelectionHandleIndex == 8) {
+			if (that.highlightedSelectionHandleIndex === 8) {
 				that.box.y++;
 				that.events.onChangeLocationY.fire(that.box.y);
 				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex == 0 || that.highlightedSelectionHandleIndex == 1 || that.highlightedSelectionHandleIndex == 2) {
+			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 1 || that.highlightedSelectionHandleIndex === 2) {
 				that.box.y++;
 				that.events.onChangeLocationY.fire(that.box.y);
 				that.box.h--;
 				that.events.onChangeHeight.fire(that.box.h);
 				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex == 5 || that.highlightedSelectionHandleIndex == 6 || that.highlightedSelectionHandleIndex == 7) {
+			} else if (that.highlightedSelectionHandleIndex === 5 || that.highlightedSelectionHandleIndex === 6 || that.highlightedSelectionHandleIndex === 7) {
 				if (that.box.y + that.box.h < that.canvas.height) {	// to prevent the selection box to go beyond the canvas boundary.
 					that.box.h++;
 					that.events.onChangeHeight.fire(that.box.h);
@@ -391,37 +391,37 @@ var fluid_1_4 = fluid_1_4 || {};
 	 */
 	var setCursorForHandles = function (style, i) {
 		switch (i) {
-			case 0:
-				style.cursor = 'nw-resize';
-				break;
-			case 1:
-				style.cursor = 'n-resize';
-				break;
-			case 2:
-				style.cursor = 'ne-resize';
-				break;
-			case 3:
-				style.cursor = 'w-resize';
-				break;
-			case 4:
-				style.cursor = 'e-resize';
-				break;
-			case 5:
-				style.cursor = 'sw-resize';
-				break;
-			case 6:
-				style.cursor = 's-resize';
-				break;
-			case 7:
-				style.cursor = 'se-resize';
-				break;
+		case 0:
+			style.cursor = 'nw-resize';
+			break;
+		case 1:
+			style.cursor = 'n-resize';
+			break;
+		case 2:
+			style.cursor = 'ne-resize';
+			break;
+		case 3:
+			style.cursor = 'w-resize';
+			break;
+		case 4:
+			style.cursor = 'e-resize';
+			break;
+		case 5:
+			style.cursor = 'sw-resize';
+			break;
+		case 6:
+			style.cursor = 's-resize';
+			break;
+		case 7:
+			style.cursor = 'se-resize';
+			break;
 		}
 	};
 	
 	var bindComponentEvents = function (that) {
 		that.events.afterChangeModel.addListener(function (newModel) {
 			var modelModified = false;
-			if (that.box != null) {
+			if (that.box !== null) {
 				if (newModel.y + Math.floor(newModel.h) > that.canvas.height) {
 					that.box.y = that.canvas.height - Math.floor(newModel.h);
 					that.events.onChangeLocationY.fire(that.box.y);
@@ -466,16 +466,16 @@ var fluid_1_4 = fluid_1_4 || {};
 			if (that.canvas && that.canvasValid === false) {
 				clear(that, that.context);
 				drawImage(that, that.context, that.image, that.resizeFactor, that.imageX, that.imageY);
-				if (that.box != null) {
+				if (that.box !== null) {
 					that.box.draw(that, that.context);
 				}
 				that.canvasValid = true;
 			}
 			if (that.keyHandlerActivated) {
-				if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex != 8) {
+				if (that.highlightedSelectionHandleIndex !== null && that.highlightedSelectionHandleIndex !== 8) {
 					that.selectionHandles[that.highlightedSelectionHandleIndex].highlight(that, that.context);
-				} else if (that.highlightedSelectionHandleIndex != null && that.highlightedSelectionHandleIndex == 8) {
-					if (that.box != null) {
+				} else if (that.highlightedSelectionHandleIndex !== null && that.highlightedSelectionHandleIndex === 8) {
+					if (that.box !== null) {
 						that.box.highlight(that, that.context);
 					}
 				}
@@ -552,7 +552,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				}
 				
 				var mouseInBox = false;
-				if (that.box != null) {
+				if (that.box !== null) {
 					if (that.mx >= that.box.x && that.mx <= that.box.x + that.box.w && that.my >= that.box.y && that.my <= that.box.y + that.box.h) {
 						that.selectedBox = that.box;
 						that.offsetx = that.mx - that.selectedBox.x;
@@ -615,7 +615,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				getMouse(that, e);
 
 				var mouseInBox = false;
-				if (that.box != null) {
+				if (that.box !== null) {
 					if (that.mx >= that.box.x && that.mx <= that.box.x + that.box.w && that.my >= that.box.y && that.my <= that.box.y + that.box.h) {
 						this.style.cursor = 'move';
 						mouseInBox = true;
@@ -627,7 +627,7 @@ var fluid_1_4 = fluid_1_4 || {};
 
 				// if there's a selection see if we grabbed one of the selection handles
 				if (that.selectedBox !== null && !that.isResizeDrag) {
-					for (i = 0; i < 8; i++) {
+					for (var i = 0; i < 8; i++) {
 						// 0  1  2
 						// 3     4
 						// 5  6  7
@@ -635,7 +635,7 @@ var fluid_1_4 = fluid_1_4 || {};
 						// we dont need to use the ghost context because
 						// selection handles will always be rectangles
 						if (that.mx >= cur.x && that.mx <= cur.x + that.options.selBoxSize &&
-						that.my >= cur.y && that.my <= cur.y + that.options.selBoxSize) {
+								that.my >= cur.y && that.my <= cur.y + that.options.selBoxSize) {
 							that.expectResize = i;
 							invalidate(that);
 							setCursorForHandles(this.style, i);
@@ -690,52 +690,52 @@ var fluid_1_4 = fluid_1_4 || {};
 		
 		var cropperKeyDown = function (evt) {
 			switch (evt.which) {
-				case 9:
-					// TAB Key
-					evt.preventDefault();
-					that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
-					invalidate(that);
-					break;
-				case 37:
-					// Left Arrow
-					that.keyboardLeftDown = true;
-					handleResizeByKeyboard(that);
-					break;
-				case 38:
-					// Up Arrow
-					that.keyboardUpDown = true;
-					handleResizeByKeyboard(that);
-					break;
-				case 39:
-					// Right Arrow
-					that.keyboardRightDown = true;
-					handleResizeByKeyboard(that);
-					break;
-				case 40:
-					// Down Arrow
-					that.keyboardDownDown = true;
-					handleResizeByKeyboard(that);
-					break;
+			case 9:
+				// TAB Key
+				evt.preventDefault();
+				that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
+				invalidate(that);
+				break;
+			case 37:
+				// Left Arrow
+				that.keyboardLeftDown = true;
+				handleResizeByKeyboard(that);
+				break;
+			case 38:
+				// Up Arrow
+				that.keyboardUpDown = true;
+				handleResizeByKeyboard(that);
+				break;
+			case 39:
+				// Right Arrow
+				that.keyboardRightDown = true;
+				handleResizeByKeyboard(that);
+				break;
+			case 40:
+				// Down Arrow
+				that.keyboardDownDown = true;
+				handleResizeByKeyboard(that);
+				break;
 			}
 		};
 		var cropperKeyUp = function (evt) {
 			switch (evt.which) {
-				case 37:
-					// Left Arrow
-					that.keyboardLeftDown = false;
-					break;
-				case 38:
-					// Up Arrow
-					that.keyboardUpDown = false;
-					break;
-				case 39:
-					// Right Arrow
-					that.keyboardRightDown = false;
-					break;
-				case 40:
-					// Down Arrow
-					that.keyboardDownDown = false;
-					break;
+			case 37:
+				// Left Arrow
+				that.keyboardLeftDown = false;
+				break;
+			case 38:
+				// Up Arrow
+				that.keyboardUpDown = false;
+				break;
+			case 39:
+				// Right Arrow
+				that.keyboardRightDown = false;
+				break;
+			case 40:
+				// Down Arrow
+				that.keyboardDownDown = false;
+				break;
 			}
 		};
 		
@@ -754,7 +754,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		that.reset = function (isNotForCrop) {
 			var croppingDimensions = {};
 			var croppedImageDataURL;
-			if (that.box != null) {
+			if (that.box !== null) {
 				croppingDimensions.x = that.box.x - that.imageX;
 				croppingDimensions.y = that.box.y - that.imageY;
 				croppingDimensions.w = that.box.w;
@@ -785,7 +785,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		};
 		
 		that.setLocationX = function (newLocationX) {
-			if (that.box != null) {
+			if (that.box !== null) {
 				that.box.x = newLocationX;
 				that.events.onChangeLocationX.fire(that.box.x);
 				that.events.afterChangeModel.fire(that.box);
@@ -796,7 +796,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			return true;
 		};
 		that.setLocationY = function (newLocationY) {
-			if (that.box != null) {
+			if (that.box !== null) {
 				that.box.y = newLocationY;
 				that.events.onChangeLocationY.fire(that.box.y);
 				that.events.afterChangeModel.fire(that.box);
@@ -807,7 +807,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			return true;
 		};
 		that.setWidth = function (newWidth, isFixedRatioOn) {
-			if (that.box != null) {
+			if (that.box !== null) {
 				if (isFixedRatioOn) {
 					that.box.h = newWidth / that.box.w * that.box.h;
 					that.events.onChangeHeight.fire(that.box.h);
@@ -822,7 +822,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			return true;
 		};
 		that.setHeight = function (newHeight, isFixedRatioOn) {
-			if (that.box != null) {
+			if (that.box !== null) {
 				if (isFixedRatioOn) {
 					that.box.w = newHeight / that.box.h * that.box.w;
 					that.events.onChangeWidth.fire(that.box.w);
