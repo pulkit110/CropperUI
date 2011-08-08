@@ -739,9 +739,11 @@ var fluid_1_4 = fluid_1_4 || {};
 		};
 		
 		that.activateKeyboardAccessibility = function () {
-			that.keyHandlerActivated = true;
-			$(document).keydown(cropperKeyDown);
-			$(document).keyup(cropperKeyUp);
+			if (!that.keyHandlerActivated) {
+				that.keyHandlerActivated = true;
+				$(document).keydown(cropperKeyDown);
+				$(document).keyup(cropperKeyUp);
+			}
 		};
 		
 		that.reset = function (isNotForCrop) {
