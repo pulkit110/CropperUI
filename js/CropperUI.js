@@ -485,7 +485,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		/**
 		 * The entry point for cropper. Initializes everything.
 		 */
-		that.init = function (canvas, resizeFactor, image, imageX, imageY, a_rectX, a_rectY, a_rectW, a_rectH) {
+		that.init = function (canvas, resizeFactor, image, imageX, imageY, rectX, rectY, rectW, rectH) {
 			that.canvas = canvas;
 			that.context = that.canvas.getContext('2d');
 			that.resizeFactor = resizeFactor;
@@ -660,10 +660,10 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.selectionHandles.push(rect);
 			}
 
-			a_rectX = a_rectX ? a_rectX : that.imageX;
-			a_rectY = a_rectY ? a_rectY : that.imageY;
-			a_rectW = a_rectW ? a_rectW : that.image.width / that.resizeFactor;
-			a_rectH = a_rectH ? a_rectH : that.image.height / that.resizeFactor;
+			rectX = rectX ? rectX : that.imageX;
+			rectY = rectY ? rectY : that.imageY;
+			rectW = rectW ? rectW : that.image.width / that.resizeFactor;
+			rectH = rectH ? rectH : that.image.height / that.resizeFactor;
 
 			//Initialize a new Box, add it, and invalidate the canvas
 			var addRect = function (x, y, w, h, fill) {
@@ -683,7 +683,7 @@ var fluid_1_4 = fluid_1_4 || {};
 				invalidate(that);
 			};
 			// add the rectangle for cropping area
-			addRect(a_rectX, a_rectY, a_rectW, a_rectH, 'rgba(2,165,165,0.0)');
+			addRect(rectX, rectY, rectW, rectH, that.options.fillColor);
 			
 			bindComponentEvents(that);
 		};
@@ -747,6 +747,22 @@ var fluid_1_4 = fluid_1_4 || {};
 			}
 		};
 		
+		that.fixDimensions = function () {
+			if (that.box.h < 0) {
+				that.box.y += that.box.h;
+				that.events.onChangeLocationY.fire(that.box.y);
+				that.box.h *= -1;
+				that.events.onChangeHeight.fire(that.box.h);
+			}
+
+			if (that.box.w < 0) {
+				that.box.x += that.box.w;
+				that.events.onChangeLocationX.fire(that.box.x);
+				that.box.w *= -1;
+				that.events.onChangeWidth.fire(that.box.w);
+			}
+		};
+		
 		/**
 		 * Function to reset cropper. 
 		 * @param isNotForCrop - whether the reset is called to crop the image or just reset the component.
@@ -754,6 +770,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		that.reset = function (isNotForCrop) {
 			var croppingDimensions = {};
 			var croppedImageDataURL;
+			that.fixDimensions();
 			if (that.box !== null) {
 				croppingDimensions.x = that.box.x - that.imageX;
 				croppingDimensions.y = that.box.y - that.imageY;
@@ -854,6 +871,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		borderWidth: 0, 
 		highlightColor: 'yellow',
 		blurColor: 'rgba(255,255,255,0.4)',
+		fillColor: 'rgba(2,165,165,0.0)',
 		INTERVAL: 20  // how often, in milliseconds, we check to see if a redraw is needed
 	});
 
