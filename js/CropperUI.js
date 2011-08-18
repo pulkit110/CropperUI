@@ -303,87 +303,224 @@ var fluid_1_4 = fluid_1_4 || {};
 		// 0  1  2
 		// 3     4
 		// 5  6  7
-		if (that.keyboardLeftDown) {
-			if (that.highlightedSelectionHandleIndex === 8) {
-				that.box.x--;
-				that.events.onChangeLocationX.fire(that.box.x);
-				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 3 || that.highlightedSelectionHandleIndex === 5) {
-				if (that.box.x > 0) {	// to prevent the selection box to go beyond the canvas boundary.						
+		
+		if (that.keyboardCtrlDown) {
+			// Resize the boinding box if arrow keys are used with ctrl
+			if (that.keyboardLeftDown) {
+				if (that.highlightedSelectionHandleIndex === 8) {
 					that.box.x--;
 					that.events.onChangeLocationX.fire(that.box.x);
-					that.box.w++;
+					invalidate(that);
+				} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 3 || that.highlightedSelectionHandleIndex === 5) {
+					if (that.box.x > 0) {	// to prevent the selection box to go beyond the canvas boundary.						
+						that.box.x--;
+						that.events.onChangeLocationX.fire(that.box.x);
+						that.box.w++;
+						that.events.onChangeWidth.fire(that.box.w);
+						invalidate(that);
+					}
+				} else if (that.highlightedSelectionHandleIndex === 2 || that.highlightedSelectionHandleIndex === 4 || that.highlightedSelectionHandleIndex === 7) {
+					that.box.w--;
 					that.events.onChangeWidth.fire(that.box.w);
 					invalidate(that);
 				}
-			} else if (that.highlightedSelectionHandleIndex === 2 || that.highlightedSelectionHandleIndex === 4 || that.highlightedSelectionHandleIndex === 7) {
-				that.box.w--;
-				that.events.onChangeWidth.fire(that.box.w);
-				invalidate(that);
 			}
-		}
-
-		if (that.keyboardUpDown) {
-			if (that.highlightedSelectionHandleIndex === 8) {
-				that.box.y--;
-				that.events.onChangeLocationY.fire(that.box.y);
-				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 1 || that.highlightedSelectionHandleIndex === 2) {
-				if (that.box.y > 0) {	// to prevent the selection box to go beyond the canvas boundary.
+	
+			if (that.keyboardUpDown) {
+				if (that.highlightedSelectionHandleIndex === 8) {
 					that.box.y--;
 					that.events.onChangeLocationY.fire(that.box.y);
-					that.box.h++;
+					invalidate(that);
+				} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 1 || that.highlightedSelectionHandleIndex === 2) {
+					if (that.box.y > 0) {	// to prevent the selection box to go beyond the canvas boundary.
+						that.box.y--;
+						that.events.onChangeLocationY.fire(that.box.y);
+						that.box.h++;
+						that.events.onChangeHeight.fire(that.box.h);
+						invalidate(that);
+					}
+				} else if (that.highlightedSelectionHandleIndex === 5 || that.highlightedSelectionHandleIndex === 6 || that.highlightedSelectionHandleIndex === 7) {
+					that.box.h--;
 					that.events.onChangeHeight.fire(that.box.h);
 					invalidate(that);
 				}
-			} else if (that.highlightedSelectionHandleIndex === 5 || that.highlightedSelectionHandleIndex === 6 || that.highlightedSelectionHandleIndex === 7) {
-				that.box.h--;
-				that.events.onChangeHeight.fire(that.box.h);
-				invalidate(that);
 			}
-		}
-
-		if (that.keyboardRightDown) {
-			if (that.highlightedSelectionHandleIndex === 8) {
-				that.box.x++;
-				that.events.onChangeLocationX.fire(that.box.x);
-				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 3 || that.highlightedSelectionHandleIndex === 5) {
-				that.box.x++;
-				that.events.onChangeLocationX.fire(that.box.x);
-				that.box.w--;
-				that.events.onChangeWidth.fire(that.box.w);
-				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex === 2 || that.highlightedSelectionHandleIndex === 4 || that.highlightedSelectionHandleIndex === 7) {
-				if (that.box.x + that.box.w < that.canvas.width) {	// to prevent the selection box to go beyond the canvas boundary.
-					that.box.w++;
+	
+			if (that.keyboardRightDown) {
+				if (that.highlightedSelectionHandleIndex === 8) {
+					that.box.x++;
+					that.events.onChangeLocationX.fire(that.box.x);
+					invalidate(that);
+				} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 3 || that.highlightedSelectionHandleIndex === 5) {
+					that.box.x++;
+					that.events.onChangeLocationX.fire(that.box.x);
+					that.box.w--;
 					that.events.onChangeWidth.fire(that.box.w);
 					invalidate(that);
+				} else if (that.highlightedSelectionHandleIndex === 2 || that.highlightedSelectionHandleIndex === 4 || that.highlightedSelectionHandleIndex === 7) {
+					if (that.box.x + that.box.w < that.canvas.width) {	// to prevent the selection box to go beyond the canvas boundary.
+						that.box.w++;
+						that.events.onChangeWidth.fire(that.box.w);
+						invalidate(that);
+					}
 				}
 			}
-		}
-
-		if (that.keyboardDownDown) {
-			if (that.highlightedSelectionHandleIndex === 8) {
-				that.box.y++;
-				that.events.onChangeLocationY.fire(that.box.y);
-				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 1 || that.highlightedSelectionHandleIndex === 2) {
-				that.box.y++;
-				that.events.onChangeLocationY.fire(that.box.y);
-				that.box.h--;
-				that.events.onChangeHeight.fire(that.box.h);
-				invalidate(that);
-			} else if (that.highlightedSelectionHandleIndex === 5 || that.highlightedSelectionHandleIndex === 6 || that.highlightedSelectionHandleIndex === 7) {
-				if (that.box.y + that.box.h < that.canvas.height) {	// to prevent the selection box to go beyond the canvas boundary.
-					that.box.h++;
+	
+			if (that.keyboardDownDown) {
+				if (that.highlightedSelectionHandleIndex === 8) {
+					that.box.y++;
+					that.events.onChangeLocationY.fire(that.box.y);
+					invalidate(that);
+				} else if (that.highlightedSelectionHandleIndex === 0 || that.highlightedSelectionHandleIndex === 1 || that.highlightedSelectionHandleIndex === 2) {
+					that.box.y++;
+					that.events.onChangeLocationY.fire(that.box.y);
+					that.box.h--;
 					that.events.onChangeHeight.fire(that.box.h);
 					invalidate(that);
+				} else if (that.highlightedSelectionHandleIndex === 5 || that.highlightedSelectionHandleIndex === 6 || that.highlightedSelectionHandleIndex === 7) {
+					if (that.box.y + that.box.h < that.canvas.height) {	// to prevent the selection box to go beyond the canvas boundary.
+						that.box.h++;
+						that.events.onChangeHeight.fire(that.box.h);
+						invalidate(that);
+					}
 				}
 			}
+			that.events.afterChangeModel.fire(that.box);
+		} else {
+			// Switch between selection handles using arrow keys without ctrl
+			
+			// 0  1  2
+			// 3     4
+			// 5  6  7
+			if (that.keyboardLeftDown) {
+				switch (that.highlightedSelectionHandleIndex) {
+				case 0:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 1:
+					that.highlightedSelectionHandleIndex = 0;
+					break;
+				case 2:
+					that.highlightedSelectionHandleIndex = 1;
+					break;
+				case 3:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 4:
+					that.highlightedSelectionHandleIndex = 3;
+					break;
+				case 5:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 6:
+					that.highlightedSelectionHandleIndex = 5;
+					break;
+				case 7:
+					that.highlightedSelectionHandleIndex = 6;
+					break;
+				case 8:
+					that.highlightedSelectionHandleIndex = 3;
+					break;
+				}
+			}
+			
+			if (that.keyboardRightDown) {
+				switch (that.highlightedSelectionHandleIndex) {
+				case 0:
+					that.highlightedSelectionHandleIndex = 1;
+					break;
+				case 1:
+					that.highlightedSelectionHandleIndex = 2;
+					break;
+				case 2:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 3:
+					that.highlightedSelectionHandleIndex = 4;
+					break;
+				case 4:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 5:
+					that.highlightedSelectionHandleIndex = 6;
+					break;
+				case 6:
+					that.highlightedSelectionHandleIndex = 7;
+					break;
+				case 7:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 8:
+					that.highlightedSelectionHandleIndex = 4;
+					break;
+				}
+			}
+			
+			if (that.keyboardUpDown) {
+				switch (that.highlightedSelectionHandleIndex) {
+				case 0:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 1:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 2:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 3:
+					that.highlightedSelectionHandleIndex = 0;
+					break;
+				case 4:
+					that.highlightedSelectionHandleIndex = 2;
+					break;
+				case 5:
+					that.highlightedSelectionHandleIndex = 3;
+					break;
+				case 6:
+					that.highlightedSelectionHandleIndex = 1;
+					break;
+				case 7:
+					that.highlightedSelectionHandleIndex = 4;
+					break;
+				case 8:
+					that.highlightedSelectionHandleIndex = 1;
+					break;
+				}
+			}
+			
+			if (that.keyboardDownDown) {
+				switch (that.highlightedSelectionHandleIndex) {
+				case 0:
+					that.highlightedSelectionHandleIndex = 3;
+					break;
+				case 1:
+					that.highlightedSelectionHandleIndex = 6;
+					break;
+				case 2:
+					that.highlightedSelectionHandleIndex = 4;
+					break;
+				case 3:
+					that.highlightedSelectionHandleIndex = 5;
+					break;
+				case 4:
+					that.highlightedSelectionHandleIndex = 7;
+					break;
+				case 5:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 6:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 7:
+					that.highlightedSelectionHandleIndex = 8;
+					break;
+				case 8:
+					that.highlightedSelectionHandleIndex = 6;
+					break;
+				}
+			}
+			invalidate (that);
 		}
-		that.events.afterChangeModel.fire(that.box);
-
 	};
 	
 	/**
@@ -503,6 +640,7 @@ var fluid_1_4 = fluid_1_4 || {};
 			that.keyboardUpDown = false;
 			that.keyboardRightDown = false;
 			that.keyboardDownDown = false;
+			that.keyboardCtrlDown = false;
 			that.keyHandlerActivated = false;
 			
 			// Holds the 8 tiny boxes that will be our selection handles
@@ -692,9 +830,16 @@ var fluid_1_4 = fluid_1_4 || {};
 			switch (evt.which) {
 			case 9:
 				// TAB Key
+				//evt.preventDefault();
+				//that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
+				//invalidate(that);
+				that.deactivateKeyboardAccessibility();
+				break;
+			case 17:
+				// Ctrl
 				evt.preventDefault();
-				that.highlightedSelectionHandleIndex = (++that.highlightedSelectionHandleIndex) % 9;	// 8 is for selecting the box
-				invalidate(that);
+				that.keyboardCtrlDown = true;
+				handleResizeByKeyboard(that);
 				break;
 			case 37:
 				// Left Arrow
@@ -718,8 +863,13 @@ var fluid_1_4 = fluid_1_4 || {};
 				break;
 			}
 		};
+		
 		var cropperKeyUp = function (evt) {
 			switch (evt.which) {
+			case 17:
+				// Ctrl
+				that.keyboardCtrlDown = false;
+				break; 
 			case 37:
 				// Left Arrow
 				that.keyboardLeftDown = false;
@@ -744,7 +894,18 @@ var fluid_1_4 = fluid_1_4 || {};
 				that.keyHandlerActivated = true;
 				$(document).keydown(cropperKeyDown);
 				$(document).keyup(cropperKeyUp);
+				that.highlightedSelectionHandleIndex = 0;
 			}
+		};
+		
+		that.deactivateKeyboardAccessibility = function () {
+			if (that.keyHandlerActivated) {
+				$(document).unbind('keyup');
+				$(document).unbind('keydown');
+				that.keyHandlerActivated = false;
+			}
+			that.highlightedSelectionHandleIndex = null;
+			invalidate(that);
 		};
 		
 		that.fixDimensions = function () {
