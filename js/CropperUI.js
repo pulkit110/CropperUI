@@ -909,6 +909,9 @@ var fluid_1_4 = fluid_1_4 || {};
 		};
 		
 		that.fixDimensions = function () {
+			if (null == that.box) {
+				return;
+			}
 			if (that.box.h < 0) {
 				that.box.y += that.box.h;
 				that.events.onChangeLocationY.fire(that.box.y);
