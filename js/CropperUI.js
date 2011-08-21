@@ -989,6 +989,9 @@ var fluid_1_4 = fluid_1_4 || {};
 		};
 		that.setWidth = function (newWidth, isFixedRatioOn) {
 			if (that.box !== null) {
+				if (that.box.x + newWidth > that.canvas.width) {
+					newWidth = that.canvas.width - that.box.x;
+				}
 				if (isFixedRatioOn) {
 					that.box.h = newWidth / that.box.w * that.box.h;
 					that.events.onChangeHeight.fire(that.box.h);
@@ -1004,6 +1007,9 @@ var fluid_1_4 = fluid_1_4 || {};
 		};
 		that.setHeight = function (newHeight, isFixedRatioOn) {
 			if (that.box !== null) {
+				if (that.box.y + newHeight > that.canvas.height) {
+					newHeight = that.canvas.height - that.box.y;
+				}
 				if (isFixedRatioOn) {
 					that.box.w = newHeight / that.box.h * that.box.w;
 					that.events.onChangeWidth.fire(that.box.w);
