@@ -1041,7 +1041,7 @@ var fluid_1_4 = fluid_1_4 || {};
 		borderWidth: 0, 
 		highlightColor: 'yellow',
 		blurColor: 'rgba(255,255,255,0.4)',
-		fillColor: 'rgba(2,165,165,0.0)',
+		fillColor: 'rgba(255,255,255,0.0)',
 		INTERVAL: 20  // how often, in milliseconds, we check to see if a redraw is needed
 	});
 
